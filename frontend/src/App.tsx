@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import './App.css';
+import './index.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QuestList } from './pages/QuestList';
 import { GameQuest } from './pages/GameQuest';
