@@ -6,7 +6,7 @@ async function runSeeders() {
     const initializedDataSource = await dataSource.initialize()
     console.log('Data Source initialized.')
     
-    for (const SeederClass of seeders) {
+    for (const SeederClass of seeders as { new (): { run: (dataSource: any) => Promise<void> }; name: string }[]) {
       const seeder = new SeederClass()
       console.log(`Running ${SeederClass.name}...`)
       await seeder.run(initializedDataSource)

@@ -1,8 +1,8 @@
-import axios, { AxiosInstance } from 'axios';
+import axios from 'axios';
 
 const apiUrl: string = import.meta.env.VITE_API_URL || ''
 
-export const apiRequestor: AxiosInstance = axios.create({
+export const apiRequestor = axios.create({
   baseURL: apiUrl,
   headers: {
     'Content-Type': 'application/json',
