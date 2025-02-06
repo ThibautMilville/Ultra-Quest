@@ -9,9 +9,6 @@ export class User {
   @Column()
   wallet_id: string;
 
-  @Column()
-  wallet_id_version: number;
-
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
 
