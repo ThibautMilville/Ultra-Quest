@@ -1,4 +1,4 @@
-import { DataSourceOptions } from 'typeorm';
+import {DataSourceOptions} from 'typeorm'
 
 export const databaseConfig: DataSourceOptions = {
   type: 'mysql',
@@ -9,6 +9,8 @@ export const databaseConfig: DataSourceOptions = {
   database: 'ultra-quest',
   synchronize: false,
   dropSchema: false,
-  entities: ['**/*.entity{.ts,.js}'],
+  logging: true,
+  entities: ['src/modules/**/*.entity.ts'],
   migrations: ['src/database/migrations/*.ts'],
-};
+  migrationsTableName: 'migrations',
+}

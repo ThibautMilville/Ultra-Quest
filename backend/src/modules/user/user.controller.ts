@@ -1,33 +1,33 @@
-import { Controller, Get, Post, Body, Put, Param, Delete } from '@nestjs/common';
-import { UserService } from './user.service';
+import {Controller, Get, Post, Body, Put, Param, Delete} from '@nestjs/common'
+import {UserService} from './user.service'
+import {User} from './user.entity'
 
-@Controller('test')
+@Controller('user')
 export class UserController {
-  constructor(private readonly testService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   @Get()
-  findAll(): Promise<UserService[]> {
-    return this.testService.findAll();
+  findAll(): Promise<User[]> {
+    return this.userService.findAll()
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.testService.findOne(+id);
+  findOne(@Param('id') id: string): Promise<User> {
+    return this.userService.findOne(id)
   }
 
   @Post()
-  create(@Body()) {
-    return this.testService.create(createTestDto);
+  create(@Body() user: User): Promise<User> {
+    return this.userService.create(user)
   }
 
-
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateTestDto: UpdateTestDto) {
-    return this.testService.update(+id, updateTestDto);
+  update(@Param('id') id: string, @Body() user: User): Promise<User> {
+    return this.userService.update(id, user)
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.testService.remove(+id);
+  remove(@Param('id') id: string): Promise<void> {
+    return this.userService.remove(id)
   }
 }
