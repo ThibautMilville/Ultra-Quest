@@ -6,7 +6,7 @@ export const databaseConfig: DataSourceOptions = {
   port: 3306,
   username: 'root',
   password: '',
-  database: 'demande-rh',
+  database: 'ultra-quest',
   synchronize: false,
   dropSchema: false,
   entities: ['**/*.entity{.ts,.js}'],

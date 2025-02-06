@@ -29,7 +29,7 @@ npm install
 
 3. Start the development server:
 ```bash
-npm run start:dev
+npm run dev
 ```
 
 The backend server will run on `http://localhost:4000`.
@@ -48,10 +48,10 @@ npm install
 
 3. Start the development server:
 ```bash
-npm start
+npm run start
 ```
 
-The frontend application will run on `http://localhost:3000`.
+The frontend application will run on `http://localhost:5173`.
 
 ## Available Scripts
 
@@ -72,7 +72,7 @@ The frontend application will run on `http://localhost:3000`.
 
 ## API Documentation
 
-The backend API is configured with CORS enabled for `http://localhost:3000` and supports the following HTTP methods:
+The backend API is configured with CORS enabled for `http://localhost:4000` and supports the following HTTP methods:
 - GET
 - POST
 - PUT
