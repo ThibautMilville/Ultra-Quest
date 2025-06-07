@@ -15,8 +15,8 @@ import QuestEditor from './views/QuestEditor'
 import QuestCreator from './views/QuestCreator'
 
 function App() {
-  // Utiliser le basename seulement en développement
-  const basename = import.meta.env.DEV && import.meta.env.VITE_APP_PATHNAME 
+  // Utiliser le basename si VITE_APP_PATHNAME est défini (dev et prod)
+  const basename = import.meta.env.VITE_APP_PATHNAME 
     ? `/${import.meta.env.VITE_APP_PATHNAME}` 
     : undefined;
 
