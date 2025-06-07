@@ -15,10 +15,11 @@ import QuestEditor from './views/QuestEditor'
 import QuestCreator from './views/QuestCreator'
 
 function App() {
-  // Utiliser le basename seulement en développement
-  const basename = import.meta.env.DEV && import.meta.env.VITE_APP_PATHNAME 
-    ? `/${import.meta.env.VITE_APP_PATHNAME}` 
-    : undefined;
+  // Utiliser le basename en production aussi pour matcher l'URL /ultra-quest
+  const basename = "/ultra-quest";
+
+  console.log('App rendering with basename:', basename);
+  console.log('Current location:', window.location.href);
 
   return (
     <Router basename={basename}>
