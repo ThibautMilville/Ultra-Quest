@@ -140,7 +140,7 @@ export const ashesQuests: Quest[] = [
     gems: 200,
     lvlup: 10,
     endsIn: '2D 17H',
-    image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=600&fit=crop&crop=center',
+    image: 'https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?w=800&h=600&fit=crop&crop=center',
     category: 'ashes',
     difficulty: 'hard',
     type: 'achievement',
