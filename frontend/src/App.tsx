@@ -1,29 +1,39 @@
-import {useEffect, useState} from 'react'
+import React from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import './index.css'
-import {BrowserRouter as Router, Routes, Route} from 'react-router-dom'
-import {QuestList} from './views/QuestList'
-import {GameQuest} from './views/GameQuest'
-import {SocialQuest} from './views/SocialQuest'
-import {apiRequestor} from './utils/axiosInstanceHelper'
+import QuestList from './views/QuestList'
+import GameQuest from './views/GameQuest'
+import SocialQuest from './views/SocialQuest'
+import QuestDetail from './components/QuestDetail'
+import AshesQuestCategory from './views/AshesQuestCategory'
+import UltraQuestCategory from './views/UltraQuestCategory'
+import ChampionQuestCategory from './views/ChampionQuestCategory'
+import QuestManager from './views/QuestManager'
+import CategoryManager from './views/CategoryManager'
+import AdminCategoryList from './views/AdminCategoryList'
+import QuestEditor from './views/QuestEditor'
+import QuestCreator from './views/QuestCreator'
 
 function App() {
-  const [message, setMessage] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    apiRequestor
-      .get<{message: string}>('/test')
-      .then(response => setMessage(response.data.message))
-      .catch(err => setError(err.message))
-  }, [])
-
   return (
-    <Router basename='/ultra-quest'>
-      <Routes>
-        <Route path='/' element={<QuestList />} />
-        <Route path='/quest/social' element={<SocialQuest />} />
-        <Route path='/quest/game' element={<GameQuest />} />
-      </Routes>
+    <Router basename="/ultra-quest">
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<QuestList />} />
+          <Route path="/game/:gameId" element={<GameQuest />} />
+          <Route path="/quest/:questId" element={<QuestDetail />} />
+          <Route path="/quest/detail" element={<QuestDetail />} />
+          <Route path="/social" element={<SocialQuest />} />
+          <Route path="/category/ashes" element={<AshesQuestCategory />} />
+          <Route path="/category/ultra" element={<UltraQuestCategory />} />
+          <Route path="/category/champion" element={<ChampionQuestCategory />} />
+          <Route path="/admin/quest-manager" element={<QuestManager />} />
+          <Route path="/admin/category/:category" element={<CategoryManager />} />
+          <Route path="/admin/category-list/:category" element={<AdminCategoryList />} />
+          <Route path="/admin/quest-editor/:step" element={<QuestEditor />} />
+          <Route path="/admin/quest-creator" element={<QuestCreator />} />
+        </Routes>
+      </div>
     </Router>
   )
 }
