@@ -6,7 +6,7 @@ export default defineConfig(({mode}) => {
 
   return {
     plugins: [react()],
-    base: `/${env.VITE_APP_PATHNAME}/`,
+    base: env.VITE_APP_PATHNAME ? `/${env.VITE_APP_PATHNAME}/` : '/',
     server: {
       proxy: {
         '/api': {
