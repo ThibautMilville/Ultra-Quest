@@ -6,20 +6,7 @@ export default defineConfig(({mode}) => {
 
   return {
     plugins: [react()],
-    base: '/',
-    build: {
-      outDir: 'dist',
-      sourcemap: false,
-      rollupOptions: {
-        output: {
-          manualChunks: {
-            vendor: ['react', 'react-dom'],
-            router: ['react-router-dom'],
-            icons: ['lucide-react']
-          }
-        }
-      }
-    },
+    base: `/${env.VITE_APP_PATHNAME}/`,
     server: {
       proxy: {
         '/api': {
