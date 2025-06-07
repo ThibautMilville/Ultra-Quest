@@ -6,7 +6,7 @@ export default defineConfig(({mode}) => {
 
   return {
     plugins: [react()],
-    base: env.VITE_APP_PATHNAME ? `/${env.VITE_APP_PATHNAME}/` : '/',
+    base: '/',
     build: {
       outDir: 'dist',
       sourcemap: false,
