@@ -6,21 +6,13 @@
   "framework": "vite",
   "rewrites": [
     {
-      "source": "/",
-      "destination": "/ultra-quest/"
-    },
-    {
-      "source": "/ultra-quest/((?!assets/).*)",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/ultra-quest",
+      "source": "/((?!assets/).*)",
       "destination": "/index.html"
     }
   ],
   "headers": [
     {
-      "source": "/ultra-quest/assets/(.*)",
+      "source": "/assets/(.*)",
       "headers": [
         {
           "key": "Cache-Control",

@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, process.cwd(), '')
   
-  // Utiliser le pathname dans tous les cas
+  // On utilise toujours le pathname si défini
   const basePath = env.VITE_APP_PATHNAME ? `/${env.VITE_APP_PATHNAME}/` : '/'
 
   return {
