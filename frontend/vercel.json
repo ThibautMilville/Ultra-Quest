@@ -13,8 +13,8 @@
   ],
   "rewrites": [
     {
-      "source": "/ultra-quest/((?!assets/).*)",
-      "destination": "/index.html"
+      "source": "/ultra-quest/(.*)",
+      "destination": "/$1"
     },
     {
       "source": "/ultra-quest",
@@ -23,7 +23,7 @@
   ],
   "headers": [
     {
-      "source": "/ultra-quest/assets/(.*)",
+      "source": "/assets/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
