@@ -15,8 +15,13 @@ import QuestEditor from './views/QuestEditor'
 import QuestCreator from './views/QuestCreator'
 
 function App() {
+  // Utiliser le basename seulement en développement
+  const basename = import.meta.env.DEV && import.meta.env.VITE_APP_PATHNAME 
+    ? `/${import.meta.env.VITE_APP_PATHNAME}` 
+    : undefined;
+
   return (
-    <Router basename="/ultra-quest">
+    <Router basename={basename}>
       <div className="App">
         <Routes>
           <Route path="/" element={<QuestList />} />

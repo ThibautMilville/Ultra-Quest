@@ -4,15 +4,26 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "vite",
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/ultra-quest",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     {
-      "source": "/((?!assets/).*)",
-      "destination": "/index.html"
+      "source": "/ultra-quest/((?!assets/).*)",
+      "destination": "/ultra-quest/index.html"
+    },
+    {
+      "source": "/ultra-quest",
+      "destination": "/ultra-quest/index.html"
     }
   ],
   "headers": [
     {
-      "source": "/assets/(.*)",
+      "source": "/ultra-quest/assets/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
