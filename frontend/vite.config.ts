@@ -7,10 +7,20 @@ export default defineConfig(({mode}) => {
   // Toujours utiliser la racine maintenant que nous gérons les langues dans les routes
   const basePath = '/'
 
-  // Configuration HTTPS pour le développement
-  const httpsConfig = {
-    key: fs.readFileSync(path.resolve(__dirname, 'certs/key.pem')),
-    cert: fs.readFileSync(path.resolve(__dirname, 'certs/cert.pem')),
+  // Configuration HTTPS pour le développement seulement
+  let httpsConfig = undefined
+  
+  // Ne charger les certificats qu'en mode développement et s'ils existent
+  if (mode === 'development') {
+    const keyPath = path.resolve(__dirname, 'certs/key.pem')
+    const certPath = path.resolve(__dirname, 'certs/cert.pem')
+    
+    if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+      httpsConfig = {
+        key: fs.readFileSync(keyPath),
+        cert: fs.readFileSync(certPath),
+      }
+    }
   }
 
   return {
