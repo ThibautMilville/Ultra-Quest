@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { ArrowLeft, Search, Filter, Copy, Edit, MoreHorizontal, Plus } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import { Header, Footer } from '../components/layout';
+import { useLocalizedNavigation } from '../hooks/useLocalizedNavigation';
+import { useTranslation } from '../contexts/TranslationContext';
 import { ashesQuests, ultraQuests, championQuests } from '../data/questsData';
 
 interface Quest {
@@ -57,7 +59,7 @@ function QuestRow({ quest }: { quest: Quest }) {
           <Copy size={16} className="text-gray-400" />
         </button>
         <Link 
-          to="/admin/quest-editor/information"
+          to={getLocalizedUrl(`/admin/quest-editor/${quest.id}/information`)}
           className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
         >
           <Edit size={16} className="text-gray-400" />
@@ -72,6 +74,8 @@ function QuestRow({ quest }: { quest: Quest }) {
 
 function CategoryManager() {
   const { category } = useParams();
+  const { getLocalizedUrl } = useLocalizedNavigation();
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('By Status');
 
@@ -138,7 +142,7 @@ function CategoryManager() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white flex flex-col">
-      <Header activeSection="Admin" />
+      <Header activeSection="nav.admin" />
       
       <div className="bg-gray-900 border-b border-gray-700">
         <div className="container mx-auto px-6 py-4">
@@ -160,7 +164,7 @@ function CategoryManager() {
         {/* Back Button */}
         <div className="absolute top-6 left-6">
           <Link 
-            to="/admin/quest-manager" 
+            to={getLocalizedUrl("/admin/quest-manager")} 
             className="flex items-center gap-2 bg-black/40 backdrop-blur-sm px-4 py-2 rounded-lg hover:bg-black/60 transition-all duration-300 shadow-lg"
           >
             <ArrowLeft size={16} className="text-white" />
@@ -171,7 +175,7 @@ function CategoryManager() {
         {/* Create Quest Button */}
         <div className="absolute top-6 right-6">
           <Link 
-            to="/admin/quest-editor/information"
+            to={getLocalizedUrl("/admin/quest-editor/information")}
             className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
           >
             <Plus size={16} />
@@ -207,7 +211,7 @@ function CategoryManager() {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none appearance-none pr-10"
             >
-              <option>By Status</option>
+              <option value="By Status">{t('admin.byStatus')}</option>
               <option>Active</option>
               <option>Draft</option>
               <option>Pending</option>

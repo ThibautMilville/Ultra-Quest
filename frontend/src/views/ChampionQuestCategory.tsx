@@ -4,8 +4,14 @@ import { Link } from 'react-router-dom';
 import { Header, Footer } from '../components/layout';
 import { championQuests } from '../data/questsData';
 import { useStaggeredScrollAnimation } from '../hooks/useScrollAnimation';
+import { useLocalizedNavigation } from '../hooks/useLocalizedNavigation';
+import { createQuestSlug } from '../utils/slugUtils';
+import { useTranslation } from '../contexts/TranslationContext';
 
 function ChampionQuestCategory() {
+  const { getLocalizedUrl } = useLocalizedNavigation();
+  const { t } = useTranslation();
+  
   // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -42,7 +48,7 @@ function ChampionQuestCategory() {
             className="flex items-center gap-3 bg-black/40 backdrop-blur-sm px-4 py-3 rounded-full hover:bg-black/60 transition-all duration-200 shadow-lg hover-lift-sm"
           >
             <ArrowLeft size={20} className="text-white" />
-            <span className="text-white font-medium">Back</span>
+            <span className="text-white font-medium">{t('button.back')}</span>
           </Link>
         </div>
 
@@ -52,7 +58,7 @@ function ChampionQuestCategory() {
             <div className="flex items-center gap-6 mb-6">
               <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center p-4 shadow-lg">
                 <img 
-                  src="/ultra-quest/champion-tactis.png" 
+                  src="/champion-tactis.png" 
                   alt="Champion Tactics" 
                   className="w-full h-full object-contain"
                   onError={(e) => {
@@ -67,7 +73,7 @@ function ChampionQuestCategory() {
                 <h1 className="text-5xl font-bold mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                   Champion Tactics
                 </h1>
-                <p className="text-xl text-gray-300">Master the art of strategic combat - {championQuests.length} quests</p>
+                <p className="text-xl text-gray-300">{t('categoryPage.champion.subtitle', { count: championQuests.length })}</p>
               </div>
             </div>
           </div>
@@ -98,7 +104,7 @@ function ChampionQuestCategory() {
                 {/* Status badge */}
                 <div className="absolute top-4 right-4">
                   <div className="bg-black/70 backdrop-blur-sm text-white px-3 py-1 rounded-md text-xs font-medium shadow-lg border border-gray-500/20">
-                    Ends in {quest.endsIn}
+                    {t('quest.endsIn')} {quest.endsIn}
                   </div>
                 </div>
 
@@ -132,15 +138,15 @@ function ChampionQuestCategory() {
                 {quest.completed ? (
                   <button className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover-lift-sm">
                     <Gift size={18} />
-                    Claim rewards
+                    {t('button.claimRewards')}
                   </button>
                 ) : (
                   <Link 
-                    to={`/quest/${quest.id}`}
+                    to={getLocalizedUrl(`/quest/${quest.id}`)}
                     className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-green-500/25 hover-lift-sm"
                   >
                     <Play size={18} />
-                    Start Quest
+                    {t('button.startQuest')}
                   </Link>
                 )}
               </div>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, Check, X, Twitter, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Header, Footer } from '../components/layout';
+import { useLocalizedNavigation } from '../hooks/useLocalizedNavigation';
 
 interface QuestData {
   name: string;
@@ -31,6 +32,7 @@ interface Reward {
 }
 
 function QuestCreator() {
+  const { getLocalizedUrl } = useLocalizedNavigation();
   const [activeStep, setActiveStep] = useState<'information' | 'tasks' | 'rewards'>('information');
   const [questData, setQuestData] = useState<QuestData>({
     name: '',
@@ -44,6 +46,20 @@ function QuestCreator() {
   });
   const [socialTasks, setSocialTasks] = useState<SocialTask[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
+  
+  // États pour les formulaires
+  const [newTaskForm, setNewTaskForm] = useState({
+    platform: 'twitter',
+    type: 'follow',
+    title: ''
+  });
+  
+  const [newRewardForm, setNewRewardForm] = useState({
+    name: '',
+    type: 'currency',
+    rarity: 'common',
+    description: ''
+  });
 
   const steps = [
     { id: 'information', label: 'Quest information' },
@@ -54,7 +70,7 @@ function QuestCreator() {
   const getStepStatus = (stepId: string) => {
     if (stepId === 'information') {
       return { 
-        completed: questData.name && questData.tagline && questData.description 
+        completed: questData.name.trim() !== '' && questData.tagline.trim() !== '' && questData.description.trim() !== '' && questData.image.trim() !== '' && questData.startDate.trim() !== ''
       };
     }
     if (stepId === 'tasks') {
@@ -85,39 +101,45 @@ function QuestCreator() {
     return 'bg-gray-600';
   };
 
-  const addSocialTask = (platform: string, type: string, title: string) => {
+  const addSocialTask = () => {
+    if (newTaskForm.title.trim() === '') return;
+    
     const newTask: SocialTask = {
       id: Date.now().toString(),
-      platform,
-      type,
-      title
+      platform: newTaskForm.platform,
+      type: newTaskForm.type,
+      title: newTaskForm.title
     };
     setSocialTasks([...socialTasks, newTask]);
+    setNewTaskForm({ platform: 'twitter', type: 'follow', title: '' });
   };
 
-  const addReward = (name: string, type: string, rarity: string, description: string) => {
+  const addReward = () => {
+    if (newRewardForm.name.trim() === '' || newRewardForm.description.trim() === '') return;
+    
     const newReward: Reward = {
       id: Date.now().toString(),
-      name,
-      type,
-      rarity,
-      description
+      name: newRewardForm.name,
+      type: newRewardForm.type,
+      rarity: newRewardForm.rarity,
+      description: newRewardForm.description
     };
     setRewards([...rewards, newReward]);
+    setNewRewardForm({ name: '', type: 'currency', rarity: 'common', description: '' });
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
-      <Header activeSection="Admin" />
+      <Header activeSection="nav.admin" />
       
       <div className="flex flex-col lg:flex-row">
         {/* Sidebar */}
-        <div className="w-full lg:w-64 bg-gray-800 min-h-auto lg:min-h-screen p-4 lg:p-6">
+        <div className="w-full lg:w-80 bg-gray-800 min-h-auto lg:min-h-screen p-4 lg:p-6">
           <div className="flex lg:flex-col lg:space-y-4 space-x-4 lg:space-x-0 overflow-x-auto lg:overflow-x-visible">
             {steps.map((step) => (
               <div
                 key={step.id}
-                onClick={() => setActiveStep(step.id)}
+                onClick={() => setActiveStep(step.id as 'information' | 'tasks' | 'rewards')}
                 className={`flex items-center gap-2 lg:gap-3 p-2 lg:p-3 rounded-lg cursor-pointer transition-colors whitespace-nowrap ${
                   step.id === activeStep ? 'bg-gray-700' : 'hover:bg-gray-700/50'
                 }`}
@@ -146,7 +168,7 @@ function QuestCreator() {
             <div className="absolute inset-0 flex flex-col sm:flex-row items-center justify-between px-4 sm:px-8 py-4">
               <div className="flex items-center gap-2 sm:gap-4 mb-2 sm:mb-0">
                 <Link 
-                  to="/admin/quest-manager"
+                  to={getLocalizedUrl("/admin/quest-manager")}
                   className="flex items-center gap-1 sm:gap-2 text-white hover:text-gray-300 transition-colors"
                 >
                   <ArrowLeft size={16} className="sm:w-5 sm:h-5" />
@@ -373,13 +395,51 @@ function QuestCreator() {
                     Add New Tasks
                     <span className="text-red-500">*</span>
                   </label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <button
-                      onClick={() => addSocialTask('twitter', 'Follow', 'Follow @UltraQuest on Twitter')}
-                      className="bg-gray-800 border border-gray-700 rounded-lg p-4 hover:bg-gray-700 transition-colors flex items-center gap-3"
+                  <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div>
+                        <label className="text-white text-sm mb-2 block">Platform</label>
+                        <select 
+                          value={newTaskForm.platform}
+                          onChange={(e) => setNewTaskForm({...newTaskForm, platform: e.target.value})}
+                          className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                        >
+                          <option value="twitter">Twitter</option>
+                          <option value="discord">Discord</option>
+                          <option value="telegram">Telegram</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-white text-sm mb-2 block">Type</label>
+                        <select 
+                          value={newTaskForm.type}
+                          onChange={(e) => setNewTaskForm({...newTaskForm, type: e.target.value})}
+                          className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                        >
+                          <option value="follow">Follow</option>
+                          <option value="like">Like</option>
+                          <option value="retweet">Retweet</option>
+                          <option value="join">Join</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-white text-sm mb-2 block">Title</label>
+                        <input 
+                          type="text" 
+                          placeholder="Task title"
+                          value={newTaskForm.title}
+                          onChange={(e) => setNewTaskForm({...newTaskForm, title: e.target.value})}
+                          className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400"
+                        />
+                      </div>
+                    </div>
+                    <button 
+                      onClick={addSocialTask}
+                      disabled={newTaskForm.title.trim() === ''}
+                      className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
                     >
-                      <Plus size={20} className="text-purple-400" />
-                      <span className="text-white">Add Twitter Follow Task</span>
+                      <Plus size={16} />
+                      Add Task
                     </button>
                   </div>
                 </div>
@@ -440,13 +500,62 @@ function QuestCreator() {
                     Add New Rewards
                     <span className="text-red-500">*</span>
                   </label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <button
-                      onClick={() => addReward('Gems', 'currency', 'common', '100 Gems reward')}
-                      className="bg-gray-800 border border-gray-700 rounded-lg p-4 hover:bg-gray-700 transition-colors flex items-center gap-3"
+                  <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                      <div>
+                        <label className="text-white text-sm mb-2 block">Name</label>
+                        <input 
+                          type="text" 
+                          placeholder="Reward name"
+                          value={newRewardForm.name}
+                          onChange={(e) => setNewRewardForm({...newRewardForm, name: e.target.value})}
+                          className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-white text-sm mb-2 block">Type</label>
+                        <select 
+                          value={newRewardForm.type}
+                          onChange={(e) => setNewRewardForm({...newRewardForm, type: e.target.value})}
+                          className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                        >
+                          <option value="currency">Currency</option>
+                          <option value="nft">NFT</option>
+                          <option value="skin">Skin</option>
+                          <option value="item">Item</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-white text-sm mb-2 block">Rarity</label>
+                        <select 
+                          value={newRewardForm.rarity}
+                          onChange={(e) => setNewRewardForm({...newRewardForm, rarity: e.target.value})}
+                          className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                        >
+                          <option value="common">Common</option>
+                          <option value="rare">Rare</option>
+                          <option value="epic">Epic</option>
+                          <option value="legendary">Legendary</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-white text-sm mb-2 block">Description</label>
+                        <input 
+                          type="text" 
+                          placeholder="Reward description"
+                          value={newRewardForm.description}
+                          onChange={(e) => setNewRewardForm({...newRewardForm, description: e.target.value})}
+                          className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400"
+                        />
+                      </div>
+                    </div>
+                    <button 
+                      onClick={addReward}
+                      disabled={newRewardForm.name.trim() === '' || newRewardForm.description.trim() === ''}
+                      className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
                     >
-                      <Plus size={20} className="text-purple-400" />
-                      <span className="text-white">Add Gems Reward</span>
+                      <Plus size={16} />
+                      Add Reward
                     </button>
                   </div>
                 </div>

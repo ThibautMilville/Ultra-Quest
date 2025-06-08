@@ -1,8 +1,11 @@
 import { Mail, MessageSquare, MapPin, Phone } from 'lucide-react';
 import Header from '../components/layout/Header';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
+import { useTranslation } from '../contexts/TranslationContext';
 
 function Contact() {
+  const { t } = useTranslation();
+  
   // Animations au scroll
   const headerAnimation = useScrollAnimation();
   const formAnimation = useScrollAnimation();
@@ -10,7 +13,7 @@ function Contact() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black">
-      <Header activeSection="Contact" />
+      <Header activeSection="nav.contact" />
       
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto">
@@ -20,11 +23,10 @@ function Contact() {
             className={`text-center mb-16 scroll-animate ${headerAnimation.isVisible ? 'visible' : ''}`}
           >
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
-              Contactez-nous
+              {t('contact.title')}
             </h1>
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              Une question ? Une suggestion ? N'hésitez pas à nous contacter. 
-              Notre équipe est là pour vous aider.
+              {t('contact.subtitle')}
             </p>
           </div>
 
@@ -36,55 +38,55 @@ function Contact() {
             >
               <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
                 <MessageSquare className="text-purple-400" />
-                Envoyez-nous un message
+                {t('contact.sendMessage')}
               </h2>
               
               <form className="space-y-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
-                    Nom complet
+                    {t('contact.fullName')}
                   </label>
                   <input
                     type="text"
                     id="name"
                     className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="Votre nom"
+                    placeholder={t('contact.placeholderName')}
                   />
                 </div>
                 
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-                    Email
+                    {t('contact.email')}
                   </label>
                   <input
                     type="email"
                     id="email"
                     className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="votre@email.com"
+                    placeholder={t('contact.placeholderEmail')}
                   />
                 </div>
                 
                 <div>
                   <label htmlFor="subject" className="block text-sm font-medium text-gray-300 mb-2">
-                    Sujet
+                    {t('contact.subject')}
                   </label>
                   <input
                     type="text"
                     id="subject"
                     className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="Sujet de votre message"
+                    placeholder={t('contact.placeholderSubject')}
                   />
                 </div>
                 
                 <div>
                   <label htmlFor="message" className="block text-sm font-medium text-gray-300 mb-2">
-                    Message
+                    {t('contact.message')}
                   </label>
                   <textarea
                     id="message"
                     rows={6}
                     className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-                    placeholder="Votre message..."
+                    placeholder={t('contact.placeholderMessage')}
                   ></textarea>
                 </div>
                 
@@ -92,7 +94,7 @@ function Contact() {
                   type="submit"
                   className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 hover:scale-105"
                 >
-                  Envoyer le message
+                  {t('contact.sendButton')}
                 </button>
               </form>
             </div>
@@ -104,14 +106,14 @@ function Contact() {
             >
               <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 border border-gray-800">
                 <h2 className="text-2xl font-bold text-white mb-6">
-                  Informations de contact
+                  {t('contact.info')}
                 </h2>
                 
                 <div className="space-y-6">
                   <div className="flex items-start gap-4">
                     <Mail className="text-purple-400 mt-1" size={20} />
                     <div>
-                      <h3 className="text-white font-medium">Email</h3>
+                      <h3 className="text-white font-medium">{t('contact.email')}</h3>
                       <p className="text-gray-300">contact@utquest.com</p>
                     </div>
                   </div>
@@ -119,7 +121,7 @@ function Contact() {
                   <div className="flex items-start gap-4">
                     <Phone className="text-purple-400 mt-1" size={20} />
                     <div>
-                      <h3 className="text-white font-medium">Téléphone</h3>
+                      <h3 className="text-white font-medium">{t('contact.phone')}</h3>
                       <p className="text-gray-300">+33 1 23 45 67 89</p>
                     </div>
                   </div>
@@ -127,7 +129,7 @@ function Contact() {
                   <div className="flex items-start gap-4">
                     <MapPin className="text-purple-400 mt-1" size={20} />
                     <div>
-                      <h3 className="text-white font-medium">Adresse</h3>
+                      <h3 className="text-white font-medium">{t('contact.address')}</h3>
                       <p className="text-gray-300">
                         123 Rue de la Blockchain<br />
                         75001 Paris, France
@@ -140,28 +142,28 @@ function Contact() {
               {/* FAQ Section */}
               <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 border border-gray-800">
                 <h2 className="text-2xl font-bold text-white mb-6">
-                  Questions fréquentes
+                  {t('contact.faq')}
                 </h2>
                 
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-white font-medium mb-2">Comment participer aux quêtes ?</h3>
+                    <h3 className="text-white font-medium mb-2">{t('contact.faq1.question')}</h3>
                     <p className="text-gray-300 text-sm">
-                      Connectez votre wallet et explorez les quêtes disponibles sur la plateforme.
+                      {t('contact.faq1.answer')}
                     </p>
                   </div>
                   
                   <div>
-                    <h3 className="text-white font-medium mb-2">Quels wallets sont supportés ?</h3>
+                    <h3 className="text-white font-medium mb-2">{t('contact.faq2.question')}</h3>
                     <p className="text-gray-300 text-sm">
-                      Nous supportons MetaMask, WalletConnect et la plupart des wallets populaires.
+                      {t('contact.faq2.answer')}
                     </p>
                   </div>
                   
                   <div>
-                    <h3 className="text-white font-medium mb-2">Comment récupérer mes récompenses ?</h3>
+                    <h3 className="text-white font-medium mb-2">{t('contact.faq3.question')}</h3>
                     <p className="text-gray-300 text-sm">
-                      Les récompenses sont automatiquement envoyées à votre wallet une fois les quêtes terminées.
+                      {t('contact.faq3.answer')}
                     </p>
                   </div>
                 </div>

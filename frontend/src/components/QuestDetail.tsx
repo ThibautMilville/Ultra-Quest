@@ -3,8 +3,13 @@ import { Gift, ArrowLeft, Check, Gamepad2, Timer, Star, Trophy } from 'lucide-re
 import { Link, useParams } from 'react-router-dom';
 import { Header, Footer } from '../components/layout';
 import { ashesQuests, ultraQuests, championQuests, socialQuests } from '../data/questsData';
+import { useTranslation } from '../contexts/TranslationContext';
+import { useLocalizedNavigation } from '../hooks/useLocalizedNavigation';
+import { parseQuestSlug, createSlug } from '../utils/slugUtils';
+import { getRewardDescriptionKey } from '../utils/rewardUtils';
 
 function RewardCard({ reward }: { reward: any }) {
+  const { t } = useTranslation();
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
       case 'common': return 'from-gray-500 to-gray-600';
@@ -36,12 +41,17 @@ function RewardCard({ reward }: { reward: any }) {
         </div>
         <div className="flex-1">
           <h3 className="text-white font-semibold text-lg">{reward.name}</h3>
-          <p className="text-gray-400 text-sm capitalize">{reward.rarity} {reward.type}</p>
+          <p className="text-gray-400 text-sm capitalize">{t(`quest.rarity.${reward.rarity}` as any)} {t(`quest.rewardType.${reward.type}` as any)}</p>
         </div>
       </div>
-      <p className="text-gray-300 text-sm mb-3">{reward.description}</p>
+      <p className="text-gray-300 text-sm mb-3">{t(getRewardDescriptionKey(reward.description) as any)}</p>
       {reward.from && (
-        <p className="text-gray-500 text-xs">{reward.from}</p>
+        <p className="text-gray-500 text-xs">
+          {reward.from.startsWith('by ') 
+            ? `${t('quest.by')} ${reward.from.substring(3)}`
+            : reward.from
+          }
+        </p>
       )}
     </div>
   );
@@ -49,25 +59,73 @@ function RewardCard({ reward }: { reward: any }) {
 
 function QuestDetail() {
   const { questId } = useParams();
+  const { t } = useTranslation();
+  const { getLocalizedUrl } = useLocalizedNavigation();
   
   // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
   
-  // Find quest in all categories
+  // Find quest by ID
   const allQuests = [...ashesQuests, ...ultraQuests, ...championQuests, ...socialQuests];
-  const quest = allQuests.find(q => q.id === questId);
+  let quest = null;
+  
+  if (questId) {
+    const foundQuest = allQuests.find(q => q.id === questId);
+    if (foundQuest) {
+      // Translate quest if it's in the translated range
+      if (foundQuest.category === 'ashes') {
+        const questIndex = ashesQuests.findIndex(aq => aq.id === foundQuest.id);
+        if (questIndex !== -1 && questIndex < 8) {
+          quest = {
+            ...foundQuest,
+            title: t(`quest.ashes.${questIndex + 1}.title` as any),
+            subtitle: t(`quest.ashes.${questIndex + 1}.subtitle` as any),
+            description: t(`quest.ashes.${questIndex + 1}.description` as any)
+          };
+        } else {
+          quest = foundQuest;
+        }
+      } else if (foundQuest.category === 'ultra') {
+        const questIndex = ultraQuests.findIndex(uq => uq.id === foundQuest.id);
+        if (questIndex !== -1 && questIndex < 6) {
+          quest = {
+            ...foundQuest,
+            title: t(`quest.ultra.${questIndex + 1}.title` as any),
+            subtitle: t(`quest.ultra.${questIndex + 1}.subtitle` as any),
+            description: t(`quest.ultra.${questIndex + 1}.description` as any)
+          };
+        } else {
+          quest = foundQuest;
+        }
+      } else if (foundQuest.category === 'champion') {
+        const questIndex = championQuests.findIndex(cq => cq.id === foundQuest.id);
+        if (questIndex !== -1 && questIndex < 5) {
+          quest = {
+            ...foundQuest,
+            title: t(`quest.champion.${questIndex + 1}.title` as any),
+            subtitle: t(`quest.champion.${questIndex + 1}.subtitle` as any),
+            description: t(`quest.champion.${questIndex + 1}.description` as any)
+          };
+        } else {
+          quest = foundQuest;
+        }
+      } else {
+        quest = foundQuest;
+      }
+    }
+  }
 
   if (!quest) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
-        <Header activeSection="Quests" />
+        <Header activeSection="nav.quests" />
         <div className="container mx-auto px-6 py-16 text-center">
-          <h1 className="text-4xl font-bold mb-4">Quest Not Found</h1>
-          <p className="text-gray-400 mb-8">The quest you're looking for doesn't exist.</p>
-          <Link to="/" className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors">
-            Back to Quests
+          <h1 className="text-4xl font-bold mb-4">{t('questDetail.notFound')}</h1>
+          <p className="text-gray-400 mb-8">{t('questDetail.notFoundDescription')}</p>
+          <Link to={getLocalizedUrl('/')} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors">
+            {t('questDetail.backToQuests')}
           </Link>
         </div>
         <Footer />
@@ -78,7 +136,7 @@ function QuestDetail() {
   const getCategoryInfo = () => {
     if (quest.category === 'ashes') {
       return {
-        name: 'Ashes of Mankind',
+        name: t('category.ashes'),
         color: 'from-orange-600 to-red-600',
         textColor: 'text-orange-400',
         bgColor: 'bg-orange-600'
@@ -86,14 +144,14 @@ function QuestDetail() {
     }
     if (quest.category === 'ultra') {
       return {
-        name: 'Ultra',
+        name: t('category.ultra'),
         color: 'from-purple-600 to-blue-600',
         textColor: 'text-purple-400',
         bgColor: 'bg-purple-600'
       };
     }
     return {
-      name: 'Champion Tactics',
+      name: t('category.champion'),
       color: 'from-green-600 to-emerald-600',
       textColor: 'text-green-400',
       bgColor: 'bg-green-600'
@@ -104,7 +162,7 @@ function QuestDetail() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
-      <Header activeSection="Quests" />
+      <Header activeSection="nav.quests" />
       
       {/* Hero Header with Quest Image */}
       <div className="relative h-64 sm:h-96 overflow-hidden">
@@ -119,11 +177,11 @@ function QuestDetail() {
         {/* Back Button */}
         <div className="absolute top-4 left-4 sm:top-8 sm:left-8">
           <Link 
-            to="/" 
+            to={getLocalizedUrl('/')} 
             className="flex items-center gap-2 sm:gap-3 bg-black/40 backdrop-blur-sm px-3 sm:px-4 py-2 sm:py-3 rounded-full hover:bg-black/60 transition-all duration-200 shadow-lg hover-lift-sm"
           >
             <ArrowLeft size={16} className="text-white sm:w-5 sm:h-5" />
-            <span className="text-white font-medium text-sm sm:text-base">Back</span>
+            <span className="text-white font-medium text-sm sm:text-base">{t('button.back')}</span>
           </Link>
         </div>
 
@@ -141,21 +199,21 @@ function QuestDetail() {
             <div className="flex flex-wrap items-center gap-2 sm:gap-6">
               <div className="flex items-center gap-2 sm:gap-3 bg-black/40 backdrop-blur-sm px-3 sm:px-4 py-2 rounded-full">
                 <Gift size={16} className={`${categoryInfo.textColor} sm:w-5 sm:h-5`} />
-                <span className="text-white font-medium text-sm sm:text-base">{quest.gems} Gems</span>
+                <span className="text-white font-medium text-sm sm:text-base">{quest.gems} {t('quest.gems')}</span>
               </div>
               <div className="flex items-center gap-2 sm:gap-3 bg-black/40 backdrop-blur-sm px-3 sm:px-4 py-2 rounded-full">
                 <Timer size={16} className={`${categoryInfo.textColor} sm:w-5 sm:h-5`} />
-                <span className="text-white font-medium text-sm sm:text-base">{quest.lvlup} LvlUp</span>
+                <span className="text-white font-medium text-sm sm:text-base">{quest.lvlup} {t('quest.lvlup')}</span>
               </div>
               <div className="text-xs sm:text-sm text-gray-300 bg-black/40 backdrop-blur-sm px-3 sm:px-4 py-2 rounded-full">
-                Ends in {quest.endsIn}
+                {t('quest.endsIn')} {quest.endsIn}
               </div>
               <div className={`text-xs sm:text-sm font-medium px-3 sm:px-4 py-2 rounded-full capitalize ${
                 quest.difficulty === 'easy' ? 'bg-green-600/80 text-green-100' :
                 quest.difficulty === 'medium' ? 'bg-yellow-600/80 text-yellow-100' :
                 'bg-red-600/80 text-red-100'
               }`}>
-                {quest.difficulty}
+                {t(`quest.difficulty.${quest.difficulty}` as any)}
               </div>
             </div>
           </div>
@@ -169,7 +227,7 @@ function QuestDetail() {
           {/* Quest Description */}
           <div className="lg:col-span-2 space-y-6 sm:space-y-8">
             <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-8 border border-gray-700/50">
-              <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-white">Quest Description</h2>
+              <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-white">{t('questDetail.description')}</h2>
               <p className="text-gray-300 text-base sm:text-lg leading-relaxed mb-4 sm:mb-6">
                 {quest.description}
               </p>
@@ -178,19 +236,19 @@ function QuestDetail() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                 <div className="text-center p-3 sm:p-4 bg-gray-800/50 rounded-lg sm:rounded-xl">
                   <div className={`text-lg sm:text-2xl font-bold ${categoryInfo.textColor}`}>{quest.gems}</div>
-                  <div className="text-gray-400 text-xs sm:text-sm">Gems</div>
+                  <div className="text-gray-400 text-xs sm:text-sm">{t('quest.gems')}</div>
                 </div>
                 <div className="text-center p-3 sm:p-4 bg-gray-800/50 rounded-lg sm:rounded-xl">
                   <div className={`text-lg sm:text-2xl font-bold ${categoryInfo.textColor}`}>{quest.lvlup}</div>
-                  <div className="text-gray-400 text-xs sm:text-sm">LvlUp</div>
+                  <div className="text-gray-400 text-xs sm:text-sm">{t('quest.lvlup')}</div>
                 </div>
                 <div className="text-center p-3 sm:p-4 bg-gray-800/50 rounded-lg sm:rounded-xl">
-                  <div className="text-lg sm:text-2xl font-bold text-white capitalize">{quest.difficulty}</div>
-                  <div className="text-gray-400 text-xs sm:text-sm">Difficulty</div>
+                  <div className="text-lg sm:text-2xl font-bold text-white capitalize">{t(`quest.difficulty.${quest.difficulty}` as any)}</div>
+                  <div className="text-gray-400 text-xs sm:text-sm">{t('quest.difficulty')}</div>
                 </div>
-                <div className="text-center p-3 sm:p-4 bg-gray-800/50 rounded-lg sm:rounded-xl">
-                  <div className="text-lg sm:text-2xl font-bold text-white capitalize">{quest.type}</div>
-                  <div className="text-gray-400 text-xs sm:text-sm">Type</div>
+                                  <div className="text-center p-3 sm:p-4 bg-gray-800/50 rounded-lg sm:rounded-xl">
+                  <div className="text-lg sm:text-2xl font-bold text-white capitalize">{t(`quest.type.${quest.type}` as any)}</div>
+                  <div className="text-gray-400 text-xs sm:text-sm">{t('quest.type')}</div>
                 </div>
               </div>
             </div>
@@ -200,7 +258,7 @@ function QuestDetail() {
               <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl p-8 border border-gray-700/50">
                 <h2 className="text-2xl font-bold mb-6 text-white flex items-center gap-3">
                   <Trophy className={categoryInfo.textColor} size={28} />
-                  Quest Rewards
+                  {t('questDetail.rewards')}
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {quest.rewards.map((reward) => (
@@ -214,28 +272,28 @@ function QuestDetail() {
           {/* Action Panel */}
           <div className="space-y-6">
             <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-2xl p-8 border border-gray-700/50 sticky top-8">
-              <h3 className="text-xl font-bold mb-6 text-white">Quest Actions</h3>
+              <h3 className="text-xl font-bold mb-6 text-white">{t('questDetail.actions')}</h3>
               
               {quest.completed ? (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 p-4 bg-green-600/20 border border-green-500/30 rounded-xl">
                     <Check size={24} className="text-green-400" />
-                    <span className="text-green-400 font-medium">Quest Completed!</span>
+                    <span className="text-green-400 font-medium">{t('questDetail.completed')}</span>
                   </div>
                   <button className={`w-full ${categoryInfo.bgColor} hover:opacity-90 text-white py-4 px-6 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-3 shadow-lg`}>
                     <Gift size={20} />
-                    Claim Rewards
+                    {t('button.claimRewards')}
                   </button>
                 </div>
               ) : (
                 <div className="space-y-4">
                   <div className="p-4 bg-blue-600/20 border border-blue-500/30 rounded-xl">
-                    <p className="text-blue-400 text-sm font-medium">Quest in Progress</p>
-                    <p className="text-gray-300 text-sm mt-1">Complete the objectives to claim rewards</p>
+                    <p className="text-blue-400 text-sm font-medium">{t('questDetail.inProgress')}</p>
+                    <p className="text-gray-300 text-sm mt-1">{t('questDetail.inProgressDescription')}</p>
                   </div>
                   <button className={`w-full ${categoryInfo.bgColor} hover:opacity-90 text-white py-4 px-6 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-3 shadow-lg`}>
                     <Gamepad2 size={20} />
-                    Start Quest
+                    {t('button.startQuest')}
                   </button>
                 </div>
               )}
@@ -244,19 +302,19 @@ function QuestDetail() {
               <div className="mt-8 pt-6 border-t border-gray-700/50">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-400">Category</span>
+                    <span className="text-gray-400">{t('questDetail.category')}</span>
                     <span className="text-white font-medium">{categoryInfo.name}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-400">Difficulty</span>
-                    <span className="text-white font-medium capitalize">{quest.difficulty}</span>
+                    <span className="text-gray-400">{t('quest.difficulty')}</span>
+                    <span className="text-white font-medium capitalize">{t(`quest.difficulty.${quest.difficulty}` as any)}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-400">Type</span>
-                    <span className="text-white font-medium capitalize">{quest.type}</span>
+                    <span className="text-gray-400">{t('quest.type')}</span>
+                    <span className="text-white font-medium capitalize">{t(`quest.type.${quest.type}` as any)}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-400">Time Remaining</span>
+                    <span className="text-gray-400">{t('questDetail.timeRemaining')}</span>
                     <span className="text-white font-medium">{quest.endsIn}</span>
                   </div>
                 </div>

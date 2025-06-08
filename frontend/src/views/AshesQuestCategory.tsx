@@ -4,15 +4,34 @@ import { Link } from 'react-router-dom';
 import { Header, Footer } from '../components/layout';
 import { ashesQuests } from '../data/questsData';
 import { useStaggeredScrollAnimation } from '../hooks/useScrollAnimation';
+import { useTranslation } from '../contexts/TranslationContext';
+import { useLocalizedNavigation } from '../hooks/useLocalizedNavigation';
+import { createQuestSlug } from '../utils/slugUtils';
 
 const AshesQuestCategory: React.FC = () => {
+  const { t } = useTranslation();
+  const { getLocalizedUrl } = useLocalizedNavigation();
+  
   // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
+  // Quêtes Ashes traduites (les 5 premières)
+  const translatedAshesQuests = ashesQuests.map((quest, index) => {
+    if (index < 5) {
+      return {
+        ...quest,
+        title: t(`quest.ashes.${index + 1}.title` as any),
+        subtitle: t(`quest.ashes.${index + 1}.subtitle` as any),
+        description: t(`quest.ashes.${index + 1}.description` as any)
+      };
+    }
+    return quest;
+  });
+
   // Trier les quêtes pour mettre les completed en premier
-  const sortedQuests = [...ashesQuests].sort((a, b) => {
+  const sortedQuests = [...translatedAshesQuests].sort((a, b) => {
     if (a.completed && !b.completed) return -1;
     if (!a.completed && b.completed) return 1;
     return 0;
@@ -42,7 +61,7 @@ const AshesQuestCategory: React.FC = () => {
             className="flex items-center gap-2 sm:gap-3 bg-black/40 backdrop-blur-sm px-3 sm:px-4 py-2 sm:py-3 rounded-full hover:bg-black/60 transition-all duration-300 shadow-lg"
           >
             <ArrowLeft size={16} className="text-white sm:w-5 sm:h-5" />
-            <span className="text-white font-medium text-sm sm:text-base">Back</span>
+            <span className="text-white font-medium text-sm sm:text-base">{t('button.back')}</span>
           </Link>
         </div>
 
@@ -52,7 +71,7 @@ const AshesQuestCategory: React.FC = () => {
             <div className="flex items-center gap-3 sm:gap-6 mb-4 sm:mb-6">
               <div className="w-12 h-12 sm:w-20 sm:h-20 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl sm:rounded-2xl flex items-center justify-center p-2 sm:p-4 shadow-lg">
                 <img 
-                  src="/ultra-quest/ashesofmankind.png" 
+                  src="/ashesofmankind.png" 
                   alt="Ashes of Mankind" 
                   className="w-full h-full object-contain"
                   onError={(e) => {
@@ -67,7 +86,7 @@ const AshesQuestCategory: React.FC = () => {
                 <h1 className="text-2xl sm:text-5xl font-bold mb-1 sm:mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                   Ashes of Mankind
                 </h1>
-                <p className="text-sm sm:text-xl text-gray-300">Survive the wasteland - {ashesQuests.length} epic quests</p>
+                <p className="text-sm sm:text-xl text-gray-300">{t('categoryPage.ashes.subtitle', { count: translatedAshesQuests.length })}</p>
               </div>
             </div>
           </div>
@@ -98,7 +117,7 @@ const AshesQuestCategory: React.FC = () => {
                 {/* Status badge */}
                 <div className="absolute top-4 right-4">
                   <div className="bg-black/70 backdrop-blur-sm text-white px-3 py-1 rounded-md text-xs font-medium shadow-lg border border-gray-500/20">
-                    Ends in {quest.endsIn}
+                    {t('quest.endsIn')} {quest.endsIn}
                   </div>
                 </div>
 
@@ -132,15 +151,15 @@ const AshesQuestCategory: React.FC = () => {
                 {quest.completed ? (
                   <button className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-orange-500/25">
                     <Gift size={18} />
-                    Claim rewards
+                    {t('button.claimRewards')}
                   </button>
                 ) : (
                   <Link 
-                    to={`/quest/${quest.id}`}
+                    to={getLocalizedUrl(`/quest/${quest.id}`)}
                     className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-orange-500/25"
                   >
                     <Play size={18} />
-                    Start Quest
+                                          {t('button.startQuest')}
                   </Link>
                 )}
               </div>
