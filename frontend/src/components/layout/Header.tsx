@@ -7,6 +7,8 @@ import LanguageSelector from './LanguageSelector';
 import ProfileDropdown from '../ProfileDropdown';
 import { useHeaderActions } from '../../hooks/useHeaderActions';
 import { Language } from '../../types/translations.types';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { getLocalizedRoute, getOriginalRoute } from '../../utils/routeMapping';
 
 interface HeaderProps {
   activeSection?: string;
@@ -15,6 +17,8 @@ interface HeaderProps {
 function Header({ activeSection }: HeaderProps) {
   const { t, currentLang, setCurrentLang, getCurrentFlag } = useTranslationWithFlags();
   const { getLocalizedUrl } = useLocalizedNavigation();
+  const navigate = useNavigate();
+  const location = useLocation();
   
   const {
     blockchainId,
@@ -41,8 +45,43 @@ function Header({ activeSection }: HeaderProps) {
     { name: t('nav.admin'), path: getLocalizedUrl('/admin/quest-manager'), key: 'nav.admin' }
   ];
 
-  const handleLanguageChange = (lang: Language) => {
-    setCurrentLang(lang);
+  const handleLanguageChange = (newLang: Language) => {
+    // Mettre à jour la langue dans le contexte
+    setCurrentLang(newLang);
+    
+    // Obtenir le chemin actuel sans le préfixe de langue
+    const pathSegments = location.pathname.split('/').filter(Boolean);
+    const currentLangFromUrl = pathSegments[0];
+    
+    let localizedPath = '';
+    if (currentLangFromUrl === 'fr' || currentLangFromUrl === 'en' || currentLangFromUrl === 'de') {
+      // Enlever le préfixe de langue actuel
+      localizedPath = '/' + pathSegments.slice(1).join('/');
+    } else {
+      // Pas de préfixe de langue, garder le chemin tel quel
+      localizedPath = location.pathname;
+    }
+    
+    // Si le chemin est vide, c'est la page d'accueil
+    if (!localizedPath || localizedPath === '/') {
+      const newPath = newLang === 'fr' ? '/' : `/${newLang}`;
+      navigate(newPath);
+    } else {
+      try {
+        // D'abord convertir le chemin localisé vers le chemin original
+        const originalPath = getOriginalRoute(localizedPath, currentLang);
+        
+        // Puis traduire le chemin original vers la nouvelle langue
+        const translatedPath = getLocalizedRoute(originalPath, newLang);
+        const newPath = newLang === 'fr' ? translatedPath : `/${newLang}${translatedPath}`;
+        navigate(newPath);
+      } catch (error) {
+        // Fallback: naviguer vers la page d'accueil dans la nouvelle langue
+        const newPath = newLang === 'fr' ? '/' : `/${newLang}`;
+        navigate(newPath);
+      }
+    }
+    
     setIsLangMenuOpen(false);
   };
 
