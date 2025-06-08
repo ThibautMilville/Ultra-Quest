@@ -494,9 +494,9 @@ export const allQuests = [...ashesQuests, ...ultraQuests, ...socialQuests];
 export const featuredQuest = ashesQuests[0]; // Ready for battle
 
 export const gameImages = [
-  '/ultra-quest/ashesofmankind.png',
+  '/ashesofmankind.png',
   'https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&q=80&w=200',
-  '/ultra-quest/favicon.ico'
+  '/favicon.ico'
 ];
 
 export const championQuests: Quest[] = [
@@ -519,7 +519,7 @@ export const championQuests: Quest[] = [
         description: 'A prestigious badge for tactical excellence',
         type: 'item',
         rarity: 'epic',
-        image: '/ultra-quest/champion-tactis.png'
+        image: '/champion-tactis.png'
       },
       {
         id: 'champion-reward-2',
@@ -527,7 +527,7 @@ export const championQuests: Quest[] = [
         description: 'Exclusive digital strategy guide',
         type: 'nft',
         rarity: 'legendary',
-        image: '/ultra-quest/champion-tactis.png'
+        image: '/champion-tactis.png'
       }
     ]
   },
@@ -550,7 +550,7 @@ export const championQuests: Quest[] = [
         description: 'Advanced battle formation plans',
         type: 'item',
         rarity: 'rare',
-        image: '/ultra-quest/champion-tactis.png'
+        image: '/champion-tactis.png'
       }
     ]
   },
@@ -574,7 +574,7 @@ export const championQuests: Quest[] = [
         description: 'Crown of the ultimate champion',
         type: 'item',
         rarity: 'legendary',
-        image: '/ultra-quest/champion-tactis.png'
+        image: '/champion-tactis.png'
       }
     ]
   },
@@ -597,7 +597,7 @@ export const championQuests: Quest[] = [
         description: 'Medal for strategic brilliance',
         type: 'item',
         rarity: 'epic',
-        image: '/ultra-quest/champion-tactis.png'
+        image: '/champion-tactis.png'
       }
     ]
   },
@@ -621,7 +621,7 @@ export const championQuests: Quest[] = [
         description: 'Ultimate arena victory trophy',
         type: 'nft',
         rarity: 'legendary',
-        image: '/ultra-quest/champion-tactis.png'
+        image: '/champion-tactis.png'
       }
     ]
   }
