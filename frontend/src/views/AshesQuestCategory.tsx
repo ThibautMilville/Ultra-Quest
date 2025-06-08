@@ -21,7 +21,7 @@ const AshesQuestCategory: React.FC = () => {
 
   // Traduire les quêtes Ashes
   const translatedAshesQuests = ashesQuests.map((quest, index) => {
-    if (index < 5) {
+    if (index < 8) {
       return {
         ...quest,
         title: t(`quest.ashes.${index + 1}.title` as any),

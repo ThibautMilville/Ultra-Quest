@@ -21,7 +21,7 @@ function UltraQuestCategory() {
 
   // Traduire les quêtes Ultra
   const translatedUltraQuests = ultraQuests.map((quest, index) => {
-    if (index < 5) {
+    if (index < 4) {
       return {
         ...quest,
         title: t(`quest.ultra.${index + 1}.title` as any),

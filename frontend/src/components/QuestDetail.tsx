@@ -92,12 +92,19 @@ function QuestDetail() {
         }
       } else if (foundQuest.category === 'ultra') {
         const questIndex = ultraQuests.findIndex(uq => uq.id === foundQuest.id);
-        if (questIndex !== -1 && questIndex < 6) {
+        if (questIndex !== -1 && questIndex < 4) {
           quest = {
             ...foundQuest,
             title: t(`quest.ultra.${questIndex + 1}.title` as any),
             subtitle: t(`quest.ultra.${questIndex + 1}.subtitle` as any),
             description: t(`quest.ultra.${questIndex + 1}.description` as any)
+          };
+        } else if (foundQuest.id === 'ultra-6') {
+          quest = {
+            ...foundQuest,
+            title: t('quest.ultra.6.title' as any),
+            subtitle: t('quest.ultra.6.subtitle' as any),
+            description: t('quest.ultra.6.description' as any)
           };
         } else {
           quest = foundQuest;
