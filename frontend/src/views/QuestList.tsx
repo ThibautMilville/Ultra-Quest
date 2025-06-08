@@ -271,9 +271,9 @@ function QuestList() {
     }
   ];
   
-  // Quêtes Ashes traduites (les 5 premières)
+  // Quêtes Ashes traduites (les 8 quêtes)
   const translatedAshesQuests = ashesQuests.map((quest, index) => {
-    if (index < 5) {
+    if (index < 8) {
       return {
         ...quest,
         title: t(`quest.ashes.${index + 1}.title` as any),
@@ -284,9 +284,9 @@ function QuestList() {
     return quest;
   });
 
-  // Quêtes Ultra traduites (les 6 premières)
+  // Quêtes Ultra traduites (gestion spéciale pour ultra-6)
   const translatedUltraQuests = ultraQuests.map((quest, index) => {
-    if (index < 5) {
+    if (index < 4) {
       return {
         ...quest,
         title: t(`quest.ultra.${index + 1}.title` as any),
@@ -304,9 +304,9 @@ function QuestList() {
     return quest;
   });
 
-  // Quêtes Champion traduites (les 3 premières)
+  // Quêtes Champion traduites (les 5 premières quêtes)
   const translatedChampionQuests = championQuests.map((quest, index) => {
-    if (index < 3) {
+    if (index < 5) {
       return {
         ...quest,
         title: t(`quest.champion.${index + 1}.title` as any),

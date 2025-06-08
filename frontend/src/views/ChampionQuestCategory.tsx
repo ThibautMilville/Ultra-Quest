@@ -21,7 +21,7 @@ function ChampionQuestCategory() {
 
   // Traduire les quêtes Champion
   const translatedChampionQuests = championQuests.map((quest, index) => {
-    if (index < 3) {
+    if (index < 5) {
       return {
         ...quest,
         title: t(`quest.champion.${index + 1}.title` as any),
