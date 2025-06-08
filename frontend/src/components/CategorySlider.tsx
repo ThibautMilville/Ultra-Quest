@@ -86,21 +86,21 @@ function CategorySlider() {
 
   return (
     <div className="relative group">
-      {/* Navigation Arrows - Responsive positioning */}
+      {/* Navigation Arrows - Hidden on mobile, visible on desktop hover */}
       <button 
         onClick={prevSlide}
-        className="absolute left-2 sm:left-0 top-1/2 -translate-y-1/2 sm:-translate-x-24 bg-black/60 backdrop-blur-sm p-2 sm:p-4 rounded-full hover:bg-black/80 transition-all duration-300 shadow-lg z-30 text-white hover:scale-110 opacity-80 sm:opacity-0 group-hover:opacity-100"
+        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-24 bg-black/60 backdrop-blur-sm p-4 rounded-full hover:bg-black/80 transition-all duration-300 shadow-lg z-30 text-white hover:scale-110 opacity-0 group-hover:opacity-100 hidden sm:block"
         aria-label="Previous slide"
       >
-        <ChevronLeft size={20} className="sm:w-7 sm:h-7" />
+        <ChevronLeft size={28} />
       </button>
       
       <button 
         onClick={nextSlide}
-        className="absolute right-2 sm:right-0 top-1/2 -translate-y-1/2 sm:translate-x-24 bg-black/60 backdrop-blur-sm p-2 sm:p-4 rounded-full hover:bg-black/80 transition-all duration-300 shadow-lg z-30 text-white hover:scale-110 opacity-80 sm:opacity-0 group-hover:opacity-100"
+        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-24 bg-black/60 backdrop-blur-sm p-4 rounded-full hover:bg-black/80 transition-all duration-300 shadow-lg z-30 text-white hover:scale-110 opacity-0 group-hover:opacity-100 hidden sm:block"
         aria-label="Next slide"
       >
-        <ChevronRight size={20} className="sm:w-7 sm:h-7" />
+        <ChevronRight size={28} />
       </button>
 
       {/* Slider Container */}
@@ -165,16 +165,16 @@ function CategorySlider() {
           </div>
         </div>
 
-        {/* Pagination Dots */}
+        {/* Pagination Dots - More discrete on mobile */}
         <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 sm:gap-3 z-10">
           {slides.map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+              className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
                 index === currentSlide 
-                  ? 'bg-white scale-125 shadow-lg' 
-                  : 'bg-white/50 hover:bg-white/75'
+                  ? 'bg-white/90 sm:bg-white scale-110 sm:scale-125 shadow-md sm:shadow-lg' 
+                  : 'bg-white/30 sm:bg-white/50 hover:bg-white/50 sm:hover:bg-white/75'
               }`}
               aria-label={`Go to slide ${index + 1}`}
             />

@@ -13,6 +13,7 @@ import CategoryManager from './views/CategoryManager'
 import AdminCategoryList from './views/AdminCategoryList'
 import QuestEditor from './views/QuestEditor'
 import QuestCreator from './views/QuestCreator'
+import Contact from './pages/Contact'
 
 function App() {
   // Utiliser le basename en production aussi pour matcher l'URL /ultra-quest
@@ -38,6 +39,7 @@ function App() {
           <Route path="/admin/category-list/:category" element={<AdminCategoryList />} />
           <Route path="/admin/quest-editor/:step" element={<QuestEditor />} />
           <Route path="/admin/quest-creator" element={<QuestCreator />} />
+          <Route path="/contact" element={<Contact />} />
         </Routes>
       </div>
     </Router>
