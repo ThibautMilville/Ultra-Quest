@@ -4,20 +4,9 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "vite",
-  "redirects": [
-    {
-      "source": "/",
-      "destination": "/ultra-quest",
-      "permanent": false
-    }
-  ],
   "rewrites": [
     {
-      "source": "/ultra-quest/(.*)",
-      "destination": "/$1"
-    },
-    {
-      "source": "/ultra-quest",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ],
