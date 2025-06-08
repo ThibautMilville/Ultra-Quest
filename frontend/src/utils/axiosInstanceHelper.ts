@@ -11,5 +11,5 @@ export const apiRequestor = axios.create({
 
 // Log pour debug en développement
 if (import.meta.env.DEV) {
-  console.log('API URL:', apiUrl);
+  // API URL configured
 }

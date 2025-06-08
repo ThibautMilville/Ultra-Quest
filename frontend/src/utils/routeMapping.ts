@@ -51,9 +51,19 @@ export const routeMapping: Record<Language, Record<string, string>> = {
 
 // Fonction pour obtenir la route traduite
 export function getLocalizedRoute(route: string, lang: Language): string {
+  // Vérifications de sécurité
+  if (!route || !lang) {
+    return route || '';
+  }
+  
   // Si la route est vide ou juste "/", retourner "/"
-  if (!route || route === '/') {
+  if (route === '/') {
     return '';
+  }
+  
+  // Vérifier que le mapping existe pour cette langue
+  if (!routeMapping[lang]) {
+    return route;
   }
   
   const segments = route.split('/').filter(Boolean);
@@ -62,8 +72,12 @@ export function getLocalizedRoute(route: string, lang: Language): string {
     if (segment.startsWith(':')) {
       return segment;
     }
-    // Sinon on le traduit
-    return routeMapping[lang][segment] || segment;
+    // Si le segment existe dans le mapping, on le traduit
+    if (routeMapping[lang] && routeMapping[lang][segment]) {
+      return routeMapping[lang][segment];
+    }
+    // Sinon on le garde tel quel (pour les IDs, noms, etc.)
+    return segment;
   });
   
   return '/' + translatedSegments.join('/');

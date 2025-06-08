@@ -8,5 +8,5 @@ export const APP_CONFIG = {
 
 // Log de debug en développement
 if (import.meta.env.DEV) {
-  console.log('App Config:', APP_CONFIG);
+  
 }

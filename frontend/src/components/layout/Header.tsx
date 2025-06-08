@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom';
-import { Wallet, Menu, X } from 'lucide-react';
+import { Wallet, Menu, X, User } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useTranslationWithFlags } from '../../hooks/useTranslation';
 import { useLocalizedNavigation } from '../../hooks/useLocalizedNavigation';
 import LanguageSelector from './LanguageSelector';
+import ProfileDropdown from '../ProfileDropdown';
+import { useHeaderActions } from '../../hooks/useHeaderActions';
 import { Language } from '../../types/translations.types';
 
 interface HeaderProps {
@@ -11,11 +13,25 @@ interface HeaderProps {
 }
 
 function Header({ activeSection }: HeaderProps) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
   const { t, currentLang, setCurrentLang, getCurrentFlag } = useTranslationWithFlags();
-  const { getLocalizedUrl, changeLanguage } = useLocalizedNavigation();
-  const langMenuRef = useRef<HTMLDivElement>(null);
+  const { getLocalizedUrl } = useLocalizedNavigation();
+  
+  const {
+    blockchainId,
+    isConnected,
+    isMenuOpen,
+    isProfileOpen,
+    isLangMenuOpen,
+    profileDropdownRef,
+    mobileProfileDropdownRef,
+    langMenuRef,
+    handleConnect,
+    handleDisconnect,
+    toggleMenu,
+    closeMenu,
+    setIsProfileOpen,
+    setIsLangMenuOpen,
+  } = useHeaderActions();
   
   const navItems = [
     { name: t('nav.home'), path: getLocalizedUrl('/'), key: 'nav.home' },
@@ -25,28 +41,10 @@ function Header({ activeSection }: HeaderProps) {
     { name: t('nav.admin'), path: getLocalizedUrl('/admin/quest-manager'), key: 'nav.admin' }
   ];
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
   const handleLanguageChange = (lang: Language) => {
-    changeLanguage(lang);
+    setCurrentLang(lang);
     setIsLangMenuOpen(false);
   };
-
-  // Fermer le menu langue quand on clique ailleurs
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (langMenuRef.current && !langMenuRef.current.contains(event.target as Node)) {
-        setIsLangMenuOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
 
   return (
     <header className="bg-black/90 backdrop-blur-sm border-b border-gray-800 sticky top-0 z-50">
@@ -132,11 +130,40 @@ function Header({ activeSection }: HeaderProps) {
               getCurrentFlag={getCurrentFlag}
               langMenuRef={langMenuRef}
             />
-            <button className="bg-purple-600 hover:bg-purple-700 text-white px-3 sm:px-6 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-1 sm:gap-2 hover:scale-105 text-sm sm:text-base">
-              <Wallet size={16} className="sm:w-[18px] sm:h-[18px]" />
-              <span className="hidden sm:inline">{t('wallet.connect')}</span>
-              <span className="sm:hidden">{t('wallet.connectShort')}</span>
-            </button>
+            
+            {/* Wallet Connection */}
+            {isConnected && blockchainId ? (
+              <div className="relative">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsProfileOpen(!isProfileOpen);
+                  }}
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-3 sm:px-6 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-1 sm:gap-2 hover:scale-105 text-sm sm:text-base"
+                >
+                  <User size={16} className="sm:w-[18px] sm:h-[18px]" />
+                  <span className="hidden sm:inline">{blockchainId.slice(0, 6)}...{blockchainId.slice(-4)}</span>
+                  <span className="sm:hidden">{blockchainId.slice(0, 4)}...</span>
+                </button>
+                
+                <ProfileDropdown
+                  isOpen={isProfileOpen}
+                  blockchainId={blockchainId}
+                  handleDisconnect={handleDisconnect}
+                  setIsOpen={setIsProfileOpen}
+                  profileDropdownRef={profileDropdownRef}
+                />
+              </div>
+            ) : (
+              <button 
+                onClick={handleConnect}
+                className="bg-purple-600 hover:bg-purple-700 text-white px-3 sm:px-6 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-1 sm:gap-2 hover:scale-105 text-sm sm:text-base"
+              >
+                <Wallet size={16} className="sm:w-[18px] sm:h-[18px]" />
+                <span className="hidden sm:inline">{t('wallet.connect')}</span>
+                <span className="sm:hidden">{t('wallet.connectShort')}</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -158,7 +185,7 @@ function Header({ activeSection }: HeaderProps) {
                       href={item.path}
                       target="_blank"
                       rel="noopener noreferrer"
-                      onClick={() => setIsMenuOpen(false)}
+                      onClick={closeMenu}
                       className={`font-medium transition-all duration-200 hover:text-purple-400 hover:scale-105 text-center ${
                         item.featured 
                           ? 'text-xl text-purple-400 font-bold bg-purple-400/10 px-4 py-2 rounded-xl border border-purple-400/20 w-full max-w-xs' 
@@ -175,7 +202,7 @@ function Header({ activeSection }: HeaderProps) {
                     <Link
                       key={item.name}
                       to={item.path}
-                      onClick={() => setIsMenuOpen(false)}
+                      onClick={closeMenu}
                       className={`font-medium transition-all duration-200 hover:text-purple-400 hover:scale-105 text-center ${
                         item.featured 
                           ? 'text-xl text-purple-400 font-bold bg-purple-400/10 px-4 py-2 rounded-xl border border-purple-400/20 w-full max-w-xs' 
@@ -200,10 +227,38 @@ function Header({ activeSection }: HeaderProps) {
                   getCurrentFlag={getCurrentFlag}
                   langMenuRef={langMenuRef}
                 />
-                <button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 hover:scale-105 text-base">
-                  <Wallet size={18} />
-                  <span>{t('wallet.connect')}</span>
-                </button>
+                
+                {/* Mobile Wallet Connection */}
+                {isConnected && blockchainId ? (
+                  <div className="relative">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsProfileOpen(!isProfileOpen);
+                      }}
+                      className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 hover:scale-105 text-base"
+                    >
+                      <User size={18} />
+                      <span>{blockchainId.slice(0, 6)}...{blockchainId.slice(-4)}</span>
+                    </button>
+                    
+                    <ProfileDropdown
+                      isOpen={isProfileOpen}
+                      blockchainId={blockchainId}
+                      handleDisconnect={handleDisconnect}
+                      setIsOpen={setIsProfileOpen}
+                      profileDropdownRef={mobileProfileDropdownRef}
+                    />
+                  </div>
+                ) : (
+                  <button 
+                    onClick={handleConnect}
+                    className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 hover:scale-105 text-base"
+                  >
+                    <Wallet size={18} />
+                    <span>{t('wallet.connect')}</span>
+                  </button>
+                )}
               </div>
             </nav>
           </div>

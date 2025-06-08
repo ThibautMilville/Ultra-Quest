@@ -7,6 +7,8 @@ import { useStaggeredScrollAnimation } from '../hooks/useScrollAnimation';
 import { useLocalizedNavigation } from '../hooks/useLocalizedNavigation';
 import { createQuestSlug } from '../utils/slugUtils';
 import { useTranslation } from '../contexts/TranslationContext';
+import { translateDuration } from '../utils/timeUtils';
+import ClaimRewardsButton from '../components/ClaimRewardsButton';
 
 function ChampionQuestCategory() {
   const { getLocalizedUrl } = useLocalizedNavigation();
@@ -17,8 +19,21 @@ function ChampionQuestCategory() {
     window.scrollTo(0, 0);
   }, []);
 
+  // Traduire les quêtes Champion
+  const translatedChampionQuests = championQuests.map((quest, index) => {
+    if (index < 3) {
+      return {
+        ...quest,
+        title: t(`quest.champion.${index + 1}.title` as any),
+        subtitle: t(`quest.champion.${index + 1}.subtitle` as any),
+        description: t(`quest.champion.${index + 1}.description` as any)
+      };
+    }
+    return quest;
+  });
+
   // Trier les quêtes pour mettre les completed en premier
-  const sortedQuests = [...championQuests].sort((a, b) => {
+  const sortedQuests = [...translatedChampionQuests].sort((a, b) => {
     if (a.completed && !b.completed) return -1;
     if (!a.completed && b.completed) return 1;
     return 0;
@@ -73,7 +88,7 @@ function ChampionQuestCategory() {
                 <h1 className="text-5xl font-bold mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                   Champion Tactics
                 </h1>
-                <p className="text-xl text-gray-300">{t('categoryPage.champion.subtitle', { count: championQuests.length })}</p>
+                <p className="text-xl text-gray-300">{t('categoryPage.champion.subtitle', { count: translatedChampionQuests.length })}</p>
               </div>
             </div>
           </div>
@@ -83,17 +98,22 @@ function ChampionQuestCategory() {
       {/* Quests Grid */}
       <section 
         ref={containerRef as React.RefObject<HTMLElement>}
-        className="container mx-auto px-6 py-16"
+        className="container mx-auto px-4 sm:px-6 py-8 sm:py-16"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-8">
           {sortedQuests.map((quest, index) => (
             <div 
               key={quest.id}
               data-index={index}
-              className={`quest-card group relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm border border-gray-700/50 hover:border-green-500/50 transition-all duration-500 hover:scale-105 scroll-animate ${getItemVisibility(index) ? 'visible' : ''}`}
-              style={{ transitionDelay: `${index * 100}ms` }}
+              className={`quest-card group relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm border border-gray-700/50 hover:border-green-500/50 transition-all duration-500 hover:scale-105 scroll-animate ${getItemVisibility(index) ? 'visible' : ''}`}
+              style={{ 
+                '--appear-delay': `${index * 100}ms`,
+                display: 'grid',
+                gridTemplateRows: 'auto 1fr auto',
+                height: '420px'
+              } as React.CSSProperties & { '--appear-delay': string }}
             >
-              <div className="relative h-48 overflow-hidden">
+              <div className="relative h-40 sm:h-48 overflow-hidden">
                 <img 
                   src={quest.image} 
                   alt={quest.title}
@@ -104,7 +124,7 @@ function ChampionQuestCategory() {
                 {/* Status badge */}
                 <div className="absolute top-4 right-4">
                   <div className="bg-black/70 backdrop-blur-sm text-white px-3 py-1 rounded-md text-xs font-medium shadow-lg border border-gray-500/20">
-                    {t('quest.endsIn')} {quest.endsIn}
+                    {t('quest.endsIn')} {translateDuration(quest.endsIn, t)}
                   </div>
                 </div>
 
@@ -116,30 +136,39 @@ function ChampionQuestCategory() {
                 )}
               </div>
               
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-2 text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-white group-hover:to-gray-300 transition-all duration-300">
-                  {quest.title}
-                </h3>
-                <p className="text-gray-400 mb-4 text-sm">{quest.subtitle}</p>
+              <div className="p-4 sm:p-6 flex flex-col justify-between min-h-0">
+                <div className="flex-1">
+                  <h3 className="text-lg sm:text-xl font-bold mb-2 text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-white group-hover:to-gray-300 transition-all duration-300 line-clamp-2">
+                    {quest.title}
+                  </h3>
+                  <p className="text-gray-400 mb-3 sm:mb-4 text-xs sm:text-sm line-clamp-1">{quest.subtitle}</p>
+                </div>
                 
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 bg-gray-700/50 px-3 py-1 rounded-full border border-gray-500/30">
-                      <Gift size={16} className="text-green-400" />
-                      <span className="text-white text-sm font-medium">{quest.gems}</span>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
+                  <div className="flex items-center gap-2 sm:gap-4">
+                    <div className="flex items-center gap-1 sm:gap-2 bg-gray-700/50 px-2 sm:px-3 py-1 rounded-full border border-gray-500/30">
+                      <Gift size={14} className="text-green-400 sm:w-4 sm:h-4" />
+                      <span className="text-white text-xs sm:text-sm font-medium">{quest.gems}</span>
                     </div>
-                    <div className="flex items-center gap-2 bg-gray-700/50 px-3 py-1 rounded-full border border-gray-500/30">
-                      <Timer size={16} className="text-green-400" />
-                      <span className="text-white text-sm font-medium">{quest.lvlup}</span>
+                    <div className="flex items-center gap-1 sm:gap-2 bg-gray-700/50 px-2 sm:px-3 py-1 rounded-full border border-gray-500/30">
+                      <Timer size={14} className="text-green-400 sm:w-4 sm:h-4" />
+                      <span className="text-white text-xs sm:text-sm font-medium">{quest.lvlup}</span>
                     </div>
                   </div>
                 </div>
+              </div>
 
+              <div className="p-4 sm:p-6 pt-0">
                 {quest.completed ? (
-                  <button className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover-lift-sm">
-                    <Gift size={18} />
-                    {t('button.claimRewards')}
-                  </button>
+                  <ClaimRewardsButton 
+                    quest={quest}
+                    onSuccess={() => {
+                      // Rewards claimed for quest
+                    }}
+                    onError={(error) => {
+                      console.error(`Failed to claim rewards for quest ${quest.title}:`, error)
+                    }}
+                  />
                 ) : (
                   <Link 
                     to={getLocalizedUrl(`/quest/${quest.id}`)}
