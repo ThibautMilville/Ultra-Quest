@@ -10,6 +10,11 @@ function RouteHandler({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const { setCurrentLang } = useTranslation();
 
+  // Scroll to top on route change
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   useEffect(() => {
     try {
       const pathSegments = location.pathname.split('/').filter(Boolean);

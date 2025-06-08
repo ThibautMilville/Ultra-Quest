@@ -7,6 +7,8 @@ import { useStaggeredScrollAnimation } from '../hooks/useScrollAnimation';
 import { useTranslation } from '../contexts/TranslationContext';
 import { useLocalizedNavigation } from '../hooks/useLocalizedNavigation';
 import { createQuestSlug } from '../utils/slugUtils';
+import { translateDuration } from '../utils/timeUtils';
+import ClaimRewardsButton from '../components/ClaimRewardsButton';
 
 const AshesQuestCategory: React.FC = () => {
   const { t } = useTranslation();
@@ -17,7 +19,7 @@ const AshesQuestCategory: React.FC = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Quêtes Ashes traduites (les 5 premières)
+  // Traduire les quêtes Ashes
   const translatedAshesQuests = ashesQuests.map((quest, index) => {
     if (index < 5) {
       return {
@@ -86,7 +88,7 @@ const AshesQuestCategory: React.FC = () => {
                 <h1 className="text-2xl sm:text-5xl font-bold mb-1 sm:mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                   Ashes of Mankind
                 </h1>
-                <p className="text-sm sm:text-xl text-gray-300">{t('categoryPage.ashes.subtitle', { count: translatedAshesQuests.length })}</p>
+                <p className="text-xl text-gray-300">{t('categoryPage.ashes.subtitle', { count: translatedAshesQuests.length })}</p>
               </div>
             </div>
           </div>
@@ -104,9 +106,14 @@ const AshesQuestCategory: React.FC = () => {
               key={quest.id}
               data-index={index}
               className={`quest-card group relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm border border-gray-700/50 hover:border-orange-500/50 transition-all duration-500 hover:scale-105 scroll-animate ${getItemVisibility(index) ? 'visible' : ''}`}
-              style={{ transitionDelay: `${index * 100}ms` }}
+              style={{ 
+                '--appear-delay': `${index * 100}ms`,
+                display: 'grid',
+                gridTemplateRows: 'auto 1fr auto',
+                height: '420px'
+              } as React.CSSProperties & { '--appear-delay': string }}
             >
-                <div className="relative h-40 sm:h-48 overflow-hidden">
+              <div className="relative h-40 sm:h-48 overflow-hidden">
                 <img 
                   src={quest.image} 
                   alt={quest.title}
@@ -117,7 +124,7 @@ const AshesQuestCategory: React.FC = () => {
                 {/* Status badge */}
                 <div className="absolute top-4 right-4">
                   <div className="bg-black/70 backdrop-blur-sm text-white px-3 py-1 rounded-md text-xs font-medium shadow-lg border border-gray-500/20">
-                    {t('quest.endsIn')} {quest.endsIn}
+                    {t('quest.endsIn')} {translateDuration(quest.endsIn, t)}
                   </div>
                 </div>
 
@@ -129,37 +136,46 @@ const AshesQuestCategory: React.FC = () => {
                 )}
               </div>
               
-                              <div className="p-4 sm:p-6">
-                  <h3 className="text-lg sm:text-xl font-bold mb-2 text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-white group-hover:to-gray-300 transition-all duration-300">
+              <div className="p-4 sm:p-6 flex flex-col justify-between min-h-0">
+                <div className="flex-1">
+                  <h3 className="text-lg sm:text-xl font-bold mb-2 text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-white group-hover:to-gray-300 transition-all duration-300 line-clamp-2">
                     {quest.title}
                   </h3>
-                  <p className="text-gray-400 mb-3 sm:mb-4 text-xs sm:text-sm">{quest.subtitle}</p>
-                  
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3">
-                    <div className="flex items-center gap-2 sm:gap-4">
-                      <div className="flex items-center gap-1 sm:gap-2 bg-gray-700/50 px-2 sm:px-3 py-1 rounded-full border border-gray-500/30">
-                        <Gift size={14} className="text-orange-400 sm:w-4 sm:h-4" />
-                        <span className="text-white text-xs sm:text-sm font-medium">{quest.gems}</span>
-                      </div>
-                      <div className="flex items-center gap-1 sm:gap-2 bg-gray-700/50 px-2 sm:px-3 py-1 rounded-full border border-gray-500/30">
-                        <Timer size={14} className="text-orange-400 sm:w-4 sm:h-4" />
-                        <span className="text-white text-xs sm:text-sm font-medium">{quest.lvlup}</span>
-                      </div>
+                  <p className="text-gray-400 mb-3 sm:mb-4 text-xs sm:text-sm line-clamp-1">{quest.subtitle}</p>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
+                  <div className="flex items-center gap-2 sm:gap-4">
+                    <div className="flex items-center gap-1 sm:gap-2 bg-gray-700/50 px-2 sm:px-3 py-1 rounded-full border border-gray-500/30">
+                      <Gift size={14} className="text-orange-400 sm:w-4 sm:h-4" />
+                      <span className="text-white text-xs sm:text-sm font-medium">{quest.gems}</span>
+                    </div>
+                    <div className="flex items-center gap-1 sm:gap-2 bg-gray-700/50 px-2 sm:px-3 py-1 rounded-full border border-gray-500/30">
+                      <Timer size={14} className="text-orange-400 sm:w-4 sm:h-4" />
+                      <span className="text-white text-xs sm:text-sm font-medium">{quest.lvlup}</span>
                     </div>
                   </div>
+                </div>
+              </div>
 
+              <div className="p-4 sm:p-6 pt-0">
                 {quest.completed ? (
-                  <button className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-orange-500/25">
-                    <Gift size={18} />
-                    {t('button.claimRewards')}
-                  </button>
+                  <ClaimRewardsButton 
+                    quest={quest}
+                    onSuccess={() => {
+                      // Rewards claimed for quest
+                    }}
+                    onError={(error) => {
+                      console.error(`Failed to claim rewards for quest ${quest.title}:`, error)
+                    }}
+                  />
                 ) : (
                   <Link 
                     to={getLocalizedUrl(`/quest/${quest.id}`)}
-                    className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-orange-500/25"
+                    className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-orange-500/25 hover-lift-sm"
                   >
                     <Play size={18} />
-                                          {t('button.startQuest')}
+                    {t('button.startQuest')}
                   </Link>
                 )}
               </div>

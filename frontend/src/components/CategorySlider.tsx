@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../contexts/TranslationContext';
+import { useLocalizedNavigation } from '../hooks/useLocalizedNavigation';
 
 interface SlideData {
   id: string;
@@ -14,12 +15,13 @@ interface SlideData {
   logo?: string;
 }
 
-
-
 function CategorySlider() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const { t } = useTranslation();
+  const { getLocalizedUrl } = useLocalizedNavigation();
 
   // Get translated slide data
   const getTranslatedSlides = (): SlideData[] => [
@@ -89,29 +91,58 @@ function CategorySlider() {
     setCurrentSlide(index);
   };
 
+  // Touch handlers for swipe functionality
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe) {
+      nextSlide();
+    } else if (isRightSwipe) {
+      prevSlide();
+    }
+  };
+
   const currentSlideData = translatedSlides[currentSlide];
 
   return (
-    <div className="relative group">
+    <div className="relative group overflow-hidden slider-container">
       {/* Navigation Arrows - Hidden on mobile, visible on desktop hover */}
       <button 
         onClick={prevSlide}
-        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-24 bg-black/60 backdrop-blur-sm p-4 rounded-full hover:bg-black/80 transition-all duration-300 shadow-lg z-30 text-white hover:scale-110 opacity-0 group-hover:opacity-100 hidden sm:block"
+        className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-black/60 backdrop-blur-sm p-3 sm:p-4 rounded-full hover:bg-black/80 transition-all duration-300 shadow-lg z-30 text-white hover:scale-110 opacity-0 group-hover:opacity-100 hidden sm:block slider-navigation"
         aria-label="Previous slide"
       >
-        <ChevronLeft size={28} />
+        <ChevronLeft size={24} className="sm:w-7 sm:h-7" />
       </button>
       
       <button 
         onClick={nextSlide}
-        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-24 bg-black/60 backdrop-blur-sm p-4 rounded-full hover:bg-black/80 transition-all duration-300 shadow-lg z-30 text-white hover:scale-110 opacity-0 group-hover:opacity-100 hidden sm:block"
+        className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-black/60 backdrop-blur-sm p-3 sm:p-4 rounded-full hover:bg-black/80 transition-all duration-300 shadow-lg z-30 text-white hover:scale-110 opacity-0 group-hover:opacity-100 hidden sm:block slider-navigation"
         aria-label="Next slide"
       >
-        <ChevronRight size={28} />
+        <ChevronRight size={24} className="sm:w-7 sm:h-7" />
       </button>
 
-      {/* Slider Container */}
-      <div className="relative h-[300px] sm:h-[500px] overflow-hidden rounded-xl sm:rounded-2xl shadow-2xl">
+      {/* Slider Container with touch events */}
+      <div 
+        className="relative h-[300px] sm:h-[500px] overflow-hidden rounded-xl sm:rounded-2xl shadow-2xl"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         {/* Background Image with Overlay */}
         <div className="absolute inset-0">
           <img 
@@ -124,9 +155,9 @@ function CategorySlider() {
         </div>
 
         {/* Content */}
-        <div className="absolute inset-0 flex items-end p-4 sm:p-8 z-10">
-          <div className="container mx-auto">
-            <div className="max-w-2xl">
+        <div className="absolute inset-0 flex items-end z-10 slider-content">
+          <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8 slider-content-wrapper">
+            <div className="max-w-2xl pb-8 sm:pb-0 w-full relative">
               {/* Logo */}
               {currentSlideData.logo && (
                 <div className="mb-2 sm:mb-4">
@@ -169,19 +200,25 @@ function CategorySlider() {
                 {currentSlideData.description}
               </p>
 
-              {/* CTA Button */}
-              <Link 
-                to={currentSlideData.link}
-                className={`inline-block bg-gradient-to-r ${currentSlideData.color} hover:opacity-90 text-white px-4 sm:px-8 py-2 sm:py-4 rounded-full font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 text-sm sm:text-base`}
-              >
-                {t('home.exploreQuests')}
-              </Link>
+              {/* CTA Button - Contained within bounds */}
+              <div className="w-full overflow-visible slider-cta-container relative z-50">
+                <div className="relative">
+                  <Link 
+                    to={getLocalizedUrl(currentSlideData.link)}
+                    className={`inline-block bg-gradient-to-r ${currentSlideData.color} hover:opacity-90 text-white px-4 sm:px-8 py-2 sm:py-4 rounded-full font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110 hover:-translate-y-1 text-sm sm:text-base max-w-full slider-cta-button group relative overflow-hidden transform-gpu`}
+                    style={{ transformOrigin: 'center' }}
+                  >
+                    <span className="relative z-10">{t('home.exploreQuests')}</span>
+                    <div className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Pagination Dots - More discrete on mobile */}
-        <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 sm:gap-3 z-10">
+        {/* Pagination Dots - Positioned below content on mobile */}
+        <div className="absolute bottom-2 sm:bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 sm:gap-3 z-20 slider-dots">
           {translatedSlides.map((_, index) => (
             <button
               key={index}

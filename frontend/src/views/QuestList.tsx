@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Timer, TowerControl as GameController, Gift, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Timer, TowerControl as GameController, Gift, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Header, Footer } from '../components/layout';
 import CategorySlider from '../components/CategorySlider';
@@ -8,6 +8,8 @@ import { useScrollAnimation, useStaggeredScrollAnimation } from '../hooks/useScr
 import { useTranslation } from '../contexts/TranslationContext';
 import { useLocalizedNavigation } from '../hooks/useLocalizedNavigation';
 import { createQuestSlug } from '../utils/slugUtils';
+import { translateDuration } from '../utils/timeUtils';
+import ClaimRewardsButton from '../components/ClaimRewardsButton';
 
 function QuestCategory({ icon, title, subtitle, active, onClick, link }: {
   icon: React.ReactNode;
@@ -169,9 +171,9 @@ function QuestRow({ title, quests, categoryLink }: {
           <Link 
             key={`${quest.id}-${currentIndex}`} 
             to={getLocalizedUrl(`/quest/${quest.id}`)}
-            className={`quest-card group relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm border border-gray-700/50 hover:border-gray-500/50 transition-all duration-500 hover:scale-105 ${isAnimating ? 'quest-card-enter' : ''}`}
+            className={`quest-card group relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm border border-gray-700/50 hover:border-gray-500/50 transition-all duration-500 hover:scale-105 flex flex-col h-[380px] ${isAnimating ? 'quest-card-enter' : ''}`}
           >
-            <div className="relative h-40 sm:h-48 overflow-hidden">
+            <div className="relative h-40 sm:h-48 overflow-hidden flex-shrink-0">
               <img 
                 src={quest.image} 
                 alt={quest.title}
@@ -182,7 +184,7 @@ function QuestRow({ title, quests, categoryLink }: {
               {/* Status badge */}
               <div className="absolute top-4 right-4">
                 <div className="bg-black/70 backdrop-blur-sm text-white px-3 py-1 rounded-md text-xs font-medium shadow-lg border border-gray-500/20">
-                  {t('quest.endsIn')} {quest.endsIn}
+                  {t('quest.endsIn')} {translateDuration(quest.endsIn, t)}
                 </div>
               </div>
 
@@ -196,13 +198,13 @@ function QuestRow({ title, quests, categoryLink }: {
               )}
             </div>
             
-            <div className="p-4 sm:p-6">
-              <h3 className="text-lg sm:text-xl font-bold mb-2 text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-white group-hover:to-gray-300 transition-all duration-300">
+            <div className="p-4 sm:p-6 flex flex-col flex-grow">
+              <h3 className="text-lg sm:text-xl font-bold mb-2 text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-white group-hover:to-gray-300 transition-all duration-300 line-clamp-2">
                 {quest.title}
               </h3>
-              <p className="text-gray-400 mb-3 sm:mb-4 text-xs sm:text-sm">{quest.subtitle}</p>
+              <p className="text-gray-400 mb-3 sm:mb-4 text-xs sm:text-sm line-clamp-2 flex-grow">{quest.subtitle}</p>
               
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-auto">
                 <div className="flex items-center gap-2 sm:gap-4">
                   <div className="flex items-center gap-1 sm:gap-2 bg-gray-700/50 px-2 sm:px-3 py-1 rounded-full border border-gray-500/30">
                     <Gift size={14} className={`${getIconColor()} sm:w-4 sm:h-4`} />
@@ -214,15 +216,22 @@ function QuestRow({ title, quests, categoryLink }: {
                   </div>
                 </div>
                 {quest.completed && (
-                  <button className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
-                    title === 'Ashes of Mankind' 
-                      ? 'bg-orange-600 hover:bg-orange-700' 
-                      : title === 'Champion Tactics'
-                      ? 'bg-green-600 hover:bg-green-700'
-                      : 'bg-purple-600 hover:bg-purple-700'
-                  } text-white`}>
-                    Claim rewards
-                  </button>
+                  <ClaimRewardsButton 
+                    quest={quest}
+                    className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium ${
+                      title === 'Ashes of Mankind' 
+                        ? 'bg-orange-600 hover:bg-orange-700' 
+                        : title === 'Champion Tactics'
+                        ? 'bg-green-600 hover:bg-green-700'
+                        : 'bg-purple-600 hover:bg-purple-700'
+                    }`}
+                    onSuccess={() => {
+                      // Rewards claimed for quest
+                    }}
+                    onError={(error) => {
+                      console.error(`Failed to claim rewards for quest ${quest.title}:`, error)
+                    }}
+                  />
                 )}
               </div>
             </div>
@@ -311,9 +320,6 @@ function QuestList() {
   // Animations au scroll
   const heroAnimation = useScrollAnimation();
   const challengesAnimation = useScrollAnimation();
-  const ultraRowAnimation = useScrollAnimation();
-  const ashesRowAnimation = useScrollAnimation();
-  const championRowAnimation = useScrollAnimation();
   const categoriesAnimation = useScrollAnimation();
 
   return (
@@ -324,7 +330,7 @@ function QuestList() {
       {/* Category Slider */}
       <section 
         ref={heroAnimation.elementRef as React.RefObject<HTMLElement>}
-        className={`container mx-auto px-6 py-8 scroll-animate ${heroAnimation.isVisible ? 'visible' : ''}`}
+        className={`container mx-auto px-4 sm:px-6 py-8 scroll-animate ${heroAnimation.isVisible ? 'visible' : ''}`}
       >
         <CategorySlider />
       </section>
@@ -371,7 +377,7 @@ function QuestList() {
                       <span className="text-white font-medium text-sm">{challenge.lvlup} {t('quest.uniq')}</span>
                     </div>
                     <div className="text-xs bg-white/20 backdrop-blur-sm px-3 py-2 rounded-full border border-white/30 text-white">
-                      {t('quest.endsIn')} {challenge.endsIn}
+                      {t('quest.endsIn')} {translateDuration(challenge.endsIn, t)}
                     </div>
                   </div>
                   

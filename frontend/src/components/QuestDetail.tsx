@@ -1,15 +1,16 @@
 import React, { useEffect } from 'react';
 import { Gift, ArrowLeft, Check, Gamepad2, Timer, Star, Trophy } from 'lucide-react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Header, Footer } from '../components/layout';
 import { ashesQuests, ultraQuests, championQuests, socialQuests } from '../data/questsData';
-import { useTranslation } from '../contexts/TranslationContext';
+import { useTranslationWithFlags } from '../hooks/useTranslation';
 import { useLocalizedNavigation } from '../hooks/useLocalizedNavigation';
 import { parseQuestSlug, createSlug } from '../utils/slugUtils';
 import { getRewardDescriptionKey } from '../utils/rewardUtils';
+import ClaimRewardsButton from './ClaimRewardsButton';
 
 function RewardCard({ reward }: { reward: any }) {
-  const { t } = useTranslation();
+  const { t } = useTranslationWithFlags();
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
       case 'common': return 'from-gray-500 to-gray-600';
@@ -59,8 +60,10 @@ function RewardCard({ reward }: { reward: any }) {
 
 function QuestDetail() {
   const { questId } = useParams();
-  const { t } = useTranslation();
+  const { t } = useTranslationWithFlags();
   const { getLocalizedUrl } = useLocalizedNavigation();
+  const navigate = useNavigate();
+  const location = useLocation();
   
   // Scroll to top when component mounts
   useEffect(() => {
@@ -125,7 +128,7 @@ function QuestDetail() {
           <h1 className="text-4xl font-bold mb-4">{t('questDetail.notFound')}</h1>
           <p className="text-gray-400 mb-8">{t('questDetail.notFoundDescription')}</p>
           <Link to={getLocalizedUrl('/')} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors">
-            {t('questDetail.backToQuests')}
+            {t('button.back')}
           </Link>
         </div>
         <Footer />
@@ -160,6 +163,49 @@ function QuestDetail() {
 
   const categoryInfo = getCategoryInfo();
 
+  // Fonction pour gérer le retour
+  const handleBack = () => {
+    const previousPage = sessionStorage.getItem('previousPage');
+    const currentPath = location.pathname;
+    
+    // Si on a une page précédente enregistrée
+    if (previousPage) {
+      
+      // Si on vient d'une page de catégorie
+      if (previousPage.includes('/category/')) {
+        navigate(previousPage);
+        return;
+      }
+      
+      // Si on vient de la page d'accueil
+      if (previousPage === '/' || 
+          previousPage === '/fr' || 
+          previousPage === '/en' || 
+          previousPage === '/de' ||
+          previousPage.match(/^\/[a-z]{2}$/)) {
+        navigate(getLocalizedUrl('/'));
+        return;
+      }
+      
+      // Pour les autres cas, naviguer vers la page précédente
+      navigate(previousPage);
+      return;
+    }
+    
+    // Fallback : utiliser l'historique du navigateur si disponible
+    if (window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+    
+    // Dernier fallback : aller à la page de catégorie de la quête ou à l'accueil
+    if (quest?.category) {
+      navigate(getLocalizedUrl(`/category/${quest.category}`));
+    } else {
+      navigate(getLocalizedUrl('/'));
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
       <Header activeSection="nav.quests" />
@@ -176,13 +222,13 @@ function QuestDetail() {
         
         {/* Back Button */}
         <div className="absolute top-4 left-4 sm:top-8 sm:left-8">
-          <Link 
-            to={getLocalizedUrl('/')} 
+          <button 
+            onClick={handleBack}
             className="flex items-center gap-2 sm:gap-3 bg-black/40 backdrop-blur-sm px-3 sm:px-4 py-2 sm:py-3 rounded-full hover:bg-black/60 transition-all duration-200 shadow-lg hover-lift-sm"
           >
             <ArrowLeft size={16} className="text-white sm:w-5 sm:h-5" />
             <span className="text-white font-medium text-sm sm:text-base">{t('button.back')}</span>
-          </Link>
+          </button>
         </div>
 
         {/* Quest Info Overlay */}
@@ -280,10 +326,17 @@ function QuestDetail() {
                     <Check size={24} className="text-green-400" />
                     <span className="text-green-400 font-medium">{t('questDetail.completed')}</span>
                   </div>
-                  <button className={`w-full ${categoryInfo.bgColor} hover:opacity-90 text-white py-4 px-6 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-3 shadow-lg`}>
-                    <Gift size={20} />
-                    {t('button.claimRewards')}
-                  </button>
+                  <ClaimRewardsButton 
+                    quest={quest}
+                    onSuccess={() => {
+                      // Rewards claimed successfully
+                      // Optionally refresh quest data or show notification
+                    }}
+                    onError={(error) => {
+                      // Failed to claim rewards
+                      // Optionally show error notification
+                    }}
+                  />
                 </div>
               ) : (
                 <div className="space-y-4">

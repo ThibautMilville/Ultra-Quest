@@ -41,6 +41,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background: #0f0f0f;
   color: white;
+  overflow-x: hidden;
+  position: relative;
 }
 
 /* Optimized animations - Simple, fast, modern */
@@ -177,6 +179,15 @@ body {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 }
 
+.hover-lift-sm {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift-sm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
 .hover-scale {
   transition: transform 0.2s ease;
 }
@@ -237,6 +248,7 @@ body {
 .quest-card:hover {
   transform: translateY(-8px) scale(1.02);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(147, 51, 234, 0.2);
+  transition: all 0.3s ease;
 }
 
 /* Ensure quest card content is above overlay effects */
@@ -408,6 +420,64 @@ body {
   .category-card:hover {
     transform: translateY(-2px) scale(1.01);
   }
+
+  /* Mobile animations are now handled by keyframes - no layout shifts */
+
+  /* Ensure containers don't overflow on mobile */
+  .container {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* Fix quest card sections padding on mobile */
+  section.container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  /* Prevent horizontal overflow on mobile */
+  * {
+    max-width: 100%;
+  }
+
+  /* Ensure slider content doesn't overflow */
+  .slider-content-wrapper {
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  /* Fix container margins on mobile */
+  .container {
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Hide number input spinners on all browsers */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Hide spinners for text inputs with numeric pattern too */
+input[inputmode="numeric"]::-webkit-outer-spin-button,
+input[inputmode="numeric"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Remove focus outline from gems input */
+input[inputmode="numeric"]:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
 }
 
 /* Dark theme improvements */
@@ -542,49 +612,112 @@ body {
   animation: scaleIn 0.4s ease-out;
 }
 
-/* Scroll-triggered animations */
+/* Line clamp utilities */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Scroll-triggered animations - Fixed to prevent layout shifts */
 .scroll-animate {
   opacity: 0;
-  transform: translateY(15px);
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition-delay: var(--appear-delay, 0ms);
 }
 
 .scroll-animate.visible {
   opacity: 1;
-  transform: translateY(0);
+}
+
+/* Réinitialiser les transitions pour le survol ET le désurvol sans délai */
+.scroll-animate:hover {
+  transition: all 0.3s ease !important;
+  transition-delay: 0ms !important;
+}
+
+/* Assurer que le retour au state normal se fait aussi sans délai */
+.scroll-animate.visible:not(:hover) {
+  transition: all 0.3s ease !important;
+  transition-delay: 0ms !important;
 }
 
 .scroll-animate-left {
   opacity: 0;
-  transform: translateX(-40px);
-  transition: all 0.5s ease-out;
+  transition: opacity 0.5s ease-out;
 }
 
 .scroll-animate-left.visible {
   opacity: 1;
-  transform: translateX(0);
+  animation: slideInFromLeft 0.5s ease-out;
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .scroll-animate-right {
   opacity: 0;
-  transform: translateX(40px);
-  transition: all 0.5s ease-out;
+  transition: opacity 0.5s ease-out;
 }
 
 .scroll-animate-right.visible {
   opacity: 1;
-  transform: translateX(0);
+  animation: slideInFromRight 0.5s ease-out;
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .scroll-animate-scale {
   opacity: 0;
-  transform: scale(0.9);
-  transition: all 0.4s ease-out;
+  transition: opacity 0.4s ease-out;
 }
 
 .scroll-animate-scale.visible {
   opacity: 1;
-  transform: scale(1);
+  animation: scaleInAnimation 0.4s ease-out;
+}
+
+@keyframes scaleInAnimation {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* Modern design bar with fade effect */
@@ -809,14 +942,6 @@ body {
 }
 
 /* Common hover effects */
-.hover-lift-sm {
-  transition: transform 0.2s ease;
-}
-
-.hover-lift-sm:hover {
-  transform: translateY(-2px);
-}
-
 .hover-glow {
   transition: box-shadow 0.2s ease;
 }

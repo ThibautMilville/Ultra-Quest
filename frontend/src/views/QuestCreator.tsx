@@ -3,6 +3,7 @@ import { ArrowLeft, Check, X, Twitter, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Header, Footer } from '../components/layout';
 import { useLocalizedNavigation } from '../hooks/useLocalizedNavigation';
+import { useTranslationWithFlags } from '../hooks/useTranslation';
 
 interface QuestData {
   name: string;
@@ -33,6 +34,7 @@ interface Reward {
 
 function QuestCreator() {
   const { getLocalizedUrl } = useLocalizedNavigation();
+  const { t } = useTranslationWithFlags();
   const [activeStep, setActiveStep] = useState<'information' | 'tasks' | 'rewards'>('information');
   const [questData, setQuestData] = useState<QuestData>({
     name: '',
@@ -62,9 +64,9 @@ function QuestCreator() {
   });
 
   const steps = [
-    { id: 'information', label: 'Quest information' },
-    { id: 'tasks', label: 'Tasks' },
-    { id: 'rewards', label: 'Rewards' }
+    { id: 'information', label: t('admin.questInformation') },
+    { id: 'tasks', label: t('admin.tasks') },
+    { id: 'rewards', label: t('admin.rewards') }
   ];
 
   const getStepStatus = (stepId: string) => {
@@ -172,17 +174,17 @@ function QuestCreator() {
                   className="flex items-center gap-1 sm:gap-2 text-white hover:text-gray-300 transition-colors"
                 >
                   <ArrowLeft size={16} className="sm:w-5 sm:h-5" />
-                  <span className="font-medium text-sm sm:text-base">Leave Quest Creator</span>
+                  <span className="font-medium text-sm sm:text-base">{t('admin.leaveQuestEditor')}</span>
                 </Link>
               </div>
               
               <div className="text-white text-center sm:text-right">
                 <h1 className="text-lg sm:text-2xl font-bold mb-1">
-                  {activeStep === 'information' && 'Quest information'}
-                  {activeStep === 'tasks' && 'Tasks'}
-                  {activeStep === 'rewards' && 'Rewards'}
+                  {activeStep === 'information' && t('admin.questInformation')}
+                  {activeStep === 'tasks' && t('admin.tasks')}
+                  {activeStep === 'rewards' && t('admin.rewards')}
                 </h1>
-                <p className="text-white/80 text-xs sm:text-base">Create a new quest</p>
+                <p className="text-white/80 text-xs sm:text-base">{t('admin.createNewQuest')}</p>
               </div>
             </div>
           </div>
@@ -196,13 +198,13 @@ function QuestCreator() {
                 {/* Quest Name */}
                 <div>
                   <label className="flex items-center gap-2 text-white font-medium mb-3">
-                    Quest name
+                    {t('admin.questName')}
                     <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <input
                       type="text"
-                      placeholder="Enter a bold title that captures the essence of your quest!"
+                      placeholder={t('admin.questNamePlaceholder')}
                       value={questData.name}
                       onChange={(e) => setQuestData({...questData, name: e.target.value})}
                       className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none"
@@ -214,13 +216,13 @@ function QuestCreator() {
                 {/* Quest Tagline */}
                 <div>
                   <label className="flex items-center gap-2 text-white font-medium mb-3">
-                    Quest tagline
+                    {t('admin.questTagline')}
                     <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <input
                       type="text"
-                      placeholder="Write a catchy description to inspire adventurers to join your quest!"
+                      placeholder={t('admin.questTaglinePlaceholder')}
                       value={questData.tagline}
                       onChange={(e) => setQuestData({...questData, tagline: e.target.value})}
                       className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none"
@@ -232,12 +234,12 @@ function QuestCreator() {
                 {/* Quest Description */}
                 <div>
                   <label className="flex items-center gap-2 text-white font-medium mb-3">
-                    Quest full description
+                    {t('admin.questDescription')}
                     <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <textarea
-                      placeholder="Describe your quest in detail here: what's the challenge, the story, and the reward."
+                      placeholder={t('admin.questDescriptionPlaceholder')}
                       value={questData.description}
                       onChange={(e) => setQuestData({...questData, description: e.target.value})}
                       rows={6}
@@ -249,15 +251,15 @@ function QuestCreator() {
                 {/* Quest Image */}
                 <div>
                   <label className="flex items-center gap-2 text-white font-medium mb-3">
-                    Quest Image
+                    {t('admin.questImage')}
                   </label>
                   <div className="border-2 border-dashed border-gray-600 rounded-lg p-8 sm:p-12 text-center hover:border-gray-500 transition-colors cursor-pointer">
                     <div className="text-gray-400 mb-4">
                       <div className="w-12 h-12 bg-gray-700 rounded-lg flex items-center justify-center mx-auto mb-3">
                         📁
                       </div>
-                      <p className="font-medium">Upload an image</p>
-                      <p className="text-sm">Recommended size: 1792x1024px</p>
+                      <p className="font-medium">{t('admin.uploadImage')}</p>
+                      <p className="text-sm">{t('admin.recommendedImageSize')}</p>
                     </div>
                   </div>
                 </div>
@@ -265,7 +267,7 @@ function QuestCreator() {
                 {/* Quest Date */}
                 <div>
                   <label className="flex items-center gap-2 text-white font-medium mb-3">
-                    Quest Date
+                    {t('admin.questDate')}
                   </label>
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                     <div className="flex-1 w-full">
@@ -304,7 +306,7 @@ function QuestCreator() {
                         </label>
                       </div>
                       <label htmlFor="noEndDate" className="text-white cursor-pointer">
-                        No End date
+                        {t('admin.noEndDate')}
                       </label>
                       <span className="text-red-500">*</span>
                     </div>
@@ -314,20 +316,25 @@ function QuestCreator() {
                 {/* Recurrence */}
                 <div>
                   <label className="flex items-center gap-2 text-white font-medium mb-3">
-                    Recurrence
+                    {t('admin.recurrence')}
                   </label>
                   <div className="flex flex-wrap gap-2 sm:gap-3">
-                    {['Once', 'Daily', 'Weekly', 'Monthly'].map((option) => (
+                    {[
+                      { key: 'Once', label: t('admin.once') },
+                      { key: 'Daily', label: t('admin.daily') },
+                      { key: 'Weekly', label: t('admin.weekly') },
+                      { key: 'Monthly', label: t('admin.monthly') }
+                    ].map((option) => (
                       <button
-                        key={option}
-                        onClick={() => setQuestData({...questData, recurrence: option})}
+                        key={option.key}
+                        onClick={() => setQuestData({...questData, recurrence: option.key})}
                         className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base ${
-                          questData.recurrence === option
+                          questData.recurrence === option.key
                             ? 'bg-purple-600 text-white'
                             : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                         }`}
                       >
-                        {option}
+                        {option.label}
                       </button>
                     ))}
                   </div>
@@ -338,10 +345,10 @@ function QuestCreator() {
               <div className="flex flex-col sm:flex-row justify-between mt-8 sm:mt-12 gap-4">
                 <div className="flex gap-2 sm:gap-3">
                   <button className="bg-gray-700 hover:bg-gray-600 text-white px-4 sm:px-6 py-3 rounded-lg font-medium transition-colors text-sm sm:text-base">
-                    Save draft
+                    {t('admin.saveDraft')}
                   </button>
                   <button className="bg-gray-700 hover:bg-gray-600 text-white px-4 sm:px-6 py-3 rounded-lg font-medium transition-colors text-sm sm:text-base">
-                    Preview
+                    {t('admin.preview')}
                   </button>
                 </div>
                 <button 
@@ -349,7 +356,7 @@ function QuestCreator() {
                   disabled={!getStepStatus('information').completed}
                   className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-6 sm:px-8 py-3 rounded-lg font-medium transition-colors text-sm sm:text-base"
                 >
-                  Next
+                  {t('admin.next')}
                 </button>
               </div>
             </div>
@@ -363,7 +370,7 @@ function QuestCreator() {
                 {socialTasks.length > 0 && (
                   <div>
                     <label className="flex items-center gap-2 text-white font-medium mb-3">
-                      Current Tasks ({socialTasks.length})
+                      {t('admin.currentTasks')} ({socialTasks.length})
                     </label>
                     <div className="space-y-3 mb-6">
                       {socialTasks.map((task) => (
@@ -392,13 +399,13 @@ function QuestCreator() {
                 {/* Add New Tasks */}
                 <div>
                   <label className="flex items-center gap-2 text-white font-medium mb-3">
-                    Add New Tasks
+                    {t('admin.addNewTasks')}
                     <span className="text-red-500">*</span>
                   </label>
                   <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                       <div>
-                        <label className="text-white text-sm mb-2 block">Platform</label>
+                        <label className="text-white text-sm mb-2 block">{t('admin.platform')}</label>
                         <select 
                           value={newTaskForm.platform}
                           onChange={(e) => setNewTaskForm({...newTaskForm, platform: e.target.value})}
@@ -410,7 +417,7 @@ function QuestCreator() {
                         </select>
                       </div>
                       <div>
-                        <label className="text-white text-sm mb-2 block">Type</label>
+                        <label className="text-white text-sm mb-2 block">{t('admin.taskType')}</label>
                         <select 
                           value={newTaskForm.type}
                           onChange={(e) => setNewTaskForm({...newTaskForm, type: e.target.value})}
@@ -423,10 +430,10 @@ function QuestCreator() {
                         </select>
                       </div>
                       <div>
-                        <label className="text-white text-sm mb-2 block">Title</label>
+                        <label className="text-white text-sm mb-2 block">{t('admin.titleField')}</label>
                         <input 
                           type="text" 
-                          placeholder="Task title"
+                          placeholder={t('admin.taskTitle')}
                           value={newTaskForm.title}
                           onChange={(e) => setNewTaskForm({...newTaskForm, title: e.target.value})}
                           className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400"
@@ -439,7 +446,7 @@ function QuestCreator() {
                       className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
                     >
                       <Plus size={16} />
-                      Add Task
+                      {t('admin.addNewTask')}
                     </button>
                   </div>
                 </div>
@@ -451,14 +458,14 @@ function QuestCreator() {
                   onClick={() => setActiveStep('information')}
                   className="bg-gray-700 hover:bg-gray-600 text-white px-6 sm:px-8 py-3 rounded-lg font-medium transition-colors text-sm sm:text-base"
                 >
-                  Previous
+                  {t('button.back')}
                 </button>
                 <button 
                   onClick={() => setActiveStep('rewards')}
                   disabled={!getStepStatus('tasks').completed}
                   className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-6 sm:px-8 py-3 rounded-lg font-medium transition-colors text-sm sm:text-base"
                 >
-                  Next
+                  {t('admin.next')}
                 </button>
               </div>
             </div>
@@ -472,7 +479,7 @@ function QuestCreator() {
                 {rewards.length > 0 && (
                   <div>
                     <label className="flex items-center gap-2 text-white font-medium mb-3">
-                      Current Rewards ({rewards.length})
+                      {t('admin.currentRewards')} ({rewards.length})
                     </label>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                       {rewards.map((reward) => (
@@ -497,52 +504,52 @@ function QuestCreator() {
                 {/* Add New Rewards */}
                 <div>
                   <label className="flex items-center gap-2 text-white font-medium mb-3">
-                    Add New Rewards
+                    {t('admin.addNewRewards')}
                     <span className="text-red-500">*</span>
                   </label>
                   <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                       <div>
-                        <label className="text-white text-sm mb-2 block">Name</label>
+                        <label className="text-white text-sm mb-2 block">{t('admin.titleField')}</label>
                         <input 
                           type="text" 
-                          placeholder="Reward name"
+                          placeholder={t('admin.titleField')}
                           value={newRewardForm.name}
                           onChange={(e) => setNewRewardForm({...newRewardForm, name: e.target.value})}
                           className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400"
                         />
                       </div>
                       <div>
-                        <label className="text-white text-sm mb-2 block">Type</label>
+                        <label className="text-white text-sm mb-2 block">{t('admin.taskType')}</label>
                         <select 
                           value={newRewardForm.type}
                           onChange={(e) => setNewRewardForm({...newRewardForm, type: e.target.value})}
                           className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
                         >
-                          <option value="currency">Currency</option>
+                          <option value="currency">{t('admin.currencyReward')}</option>
                           <option value="nft">NFT</option>
                           <option value="skin">Skin</option>
                           <option value="item">Item</option>
                         </select>
                       </div>
                       <div>
-                        <label className="text-white text-sm mb-2 block">Rarity</label>
+                        <label className="text-white text-sm mb-2 block">{t('admin.rarity')}</label>
                         <select 
                           value={newRewardForm.rarity}
                           onChange={(e) => setNewRewardForm({...newRewardForm, rarity: e.target.value})}
                           className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
                         >
-                          <option value="common">Common</option>
-                          <option value="rare">Rare</option>
-                          <option value="epic">Epic</option>
-                          <option value="legendary">Legendary</option>
+                          <option value="common">{t('admin.common')}</option>
+                          <option value="rare">{t('admin.rare')}</option>
+                          <option value="epic">{t('admin.epic')}</option>
+                          <option value="legendary">{t('admin.legendary')}</option>
                         </select>
                       </div>
                       <div>
-                        <label className="text-white text-sm mb-2 block">Description</label>
+                        <label className="text-white text-sm mb-2 block">{t('admin.description')}</label>
                         <input 
                           type="text" 
-                          placeholder="Reward description"
+                          placeholder={t('admin.description')}
                           value={newRewardForm.description}
                           onChange={(e) => setNewRewardForm({...newRewardForm, description: e.target.value})}
                           className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400"
@@ -555,7 +562,7 @@ function QuestCreator() {
                       className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
                     >
                       <Plus size={16} />
-                      Add Reward
+                      {t('admin.add')}
                     </button>
                   </div>
                 </div>
@@ -567,13 +574,13 @@ function QuestCreator() {
                   onClick={() => setActiveStep('tasks')}
                   className="bg-gray-700 hover:bg-gray-600 text-white px-6 sm:px-8 py-3 rounded-lg font-medium transition-colors text-sm sm:text-base"
                 >
-                  Previous
+                  {t('button.back')}
                 </button>
                 <button 
                   disabled={!getStepStatus('rewards').completed}
                   className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-6 sm:px-8 py-3 rounded-lg font-medium transition-colors text-sm sm:text-base"
                 >
-                  Create Quest
+                  {t('admin.createNewQuest')}
                 </button>
               </div>
             </div>

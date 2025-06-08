@@ -4,6 +4,9 @@ import { Link } from 'react-router-dom';
 import { Header, Footer } from '../components/layout';
 import { socialQuests } from '../data/questsData';
 import RewardCard from '../components/RewardCard';
+import { useTranslationWithFlags } from '../hooks/useTranslation';
+import { getRewardDescriptionKey } from '../utils/rewardUtils';
+import ClaimRewardsButton from '../components/ClaimRewardsButton';
 
 
 
@@ -44,6 +47,7 @@ function SocialTask({ icon, title, description, completed }: {
 }
 
 function SocialQuest() {
+  const { t } = useTranslationWithFlags();
   const socialQuest = socialQuests[0]; // Social Adventurer quest
 
   return (
@@ -85,34 +89,40 @@ function SocialQuest() {
               </div>
               
               <div className="bg-purple-600/20 backdrop-blur-sm border border-purple-500/30 rounded-xl p-6 min-w-[300px]">
-                <button className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg font-medium transition-colors mb-4">
-                  Claim rewards
-                </button>
+                <ClaimRewardsButton 
+                  quest={socialQuest}
+                  onSuccess={() => {
+                    // Rewards claimed for social quest
+                  }}
+                  onError={(error) => {
+                    // Failed to claim rewards for social quest
+                  }}
+                />
                 
                 <div className="space-y-3">
                   <SocialTask
                     icon={<Twitter size={20} className="text-white" />}
-                    title="Follow @ultra.io on Twitter"
-                    description="Discover the latest news, sneak peeks, and spicy memes from the heart of XX Gaming."
+                    title={t('admin.task.followUltraX')}
+                    description={t('admin.task.followUltraXDesc')}
                     completed={true}
                   />
                   
                   <SocialTask
                     icon={<MessageSquare size={20} className="text-white" />}
-                    title="Post your hype using #UltraGamingQuest hashtag"
-                    description="Share your excitement about XX Gaming and join the conversation with the community."
+                    title={t('admin.task.postHype')}
+                    description={t('admin.task.postHypeDesc')}
                   />
                   
                   <SocialTask
                     icon={<Users size={20} className="text-white" />}
-                    title="Tag 2 friends in a post with #UltraGamingQuest"
-                    description="Spread the joy by recruiting your party of social adventurers."
+                    title={t('admin.task.tagFriends')}
+                    description={t('admin.task.tagFriendsDesc')}
                   />
                   
                   <SocialTask
                     icon={<MessageSquare size={20} className="text-white" />}
-                    title="Comment on Ultra latest post"
-                    description="Let your voice be heard! Cheer us on, share your thoughts, or drop an emoji or two."
+                    title={t('admin.task.commentPost')}
+                    description={t('admin.task.commentPostDesc')}
                   />
                 </div>
               </div>
@@ -124,7 +134,7 @@ function SocialQuest() {
       {/* Rewards Section */}
       <section className="container mx-auto px-6 py-12">
         <div className="flex items-center gap-4 mb-8">
-          <h2 className="text-2xl font-bold">Rewards</h2>
+          <h2 className="text-2xl font-bold">{t('rewards.title')}</h2>
           <div className="flex items-center gap-2">
             <Gift size={20} className="text-purple-400" />
             <span className="text-white font-medium">{socialQuest.gems} Gems</span>
@@ -142,7 +152,7 @@ function SocialQuest() {
             ))
           ) : (
             <div className="text-gray-400 text-center py-8">
-              No additional rewards for this quest
+              {t('rewards.noAdditionalRewards')}
             </div>
           )}
         </div>
