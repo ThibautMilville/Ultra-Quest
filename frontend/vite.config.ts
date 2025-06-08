@@ -2,10 +2,8 @@ import {defineConfig, loadEnv} from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig(({mode}) => {
-  const env = loadEnv(mode, process.cwd(), '')
-  
-  // En dev on utilise le pathname, en prod on utilise la racine
-  const basePath = mode === 'development' && env.VITE_APP_PATHNAME ? `/${env.VITE_APP_PATHNAME}/` : '/'
+  // Toujours utiliser la racine maintenant que nous gérons les langues dans les routes
+  const basePath = '/'
 
   return {
     plugins: [react()],

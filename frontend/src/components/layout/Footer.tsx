@@ -1,5 +1,6 @@
 import React from 'react';
 import { Youtube, Twitch } from 'lucide-react';
+import { useTranslation } from '../../contexts/TranslationContext';
 
 // Custom X (Twitter) icon component
 const XIcon = ({ size = 18, className = "" }) => (
@@ -23,12 +24,14 @@ const DiscordIcon = ({ size = 18, className = "" }) => (
 );
 
 const Footer: React.FC = () => {
+  const { t } = useTranslation();
+  
   return (
     <footer className="bg-black border-t border-gray-800 py-6 sm:py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-gray-400 text-xs sm:text-sm mb-4 md:mb-0 text-center md:text-left">
-            ©{new Date().getFullYear()} Ultra Times. All rights reserved. All trademarks or product names are the property of their respective owners.
+            ©{new Date().getFullYear()} Ultra Times. {t('footer.copyright')}
           </div>
           
           <div className="flex items-center space-x-4 sm:space-x-6">
@@ -37,7 +40,7 @@ const Footer: React.FC = () => {
               target="_blank" 
               rel="noopener noreferrer"
               className="text-gray-400 hover:text-white transition-colors hover:scale-110 duration-200"
-              aria-label="Follow us on X"
+              aria-label={t('footer.followX')}
             >
               <XIcon size={18} className="sm:w-5 sm:h-5" />
             </a>
@@ -46,7 +49,7 @@ const Footer: React.FC = () => {
               target="_blank" 
               rel="noopener noreferrer"
               className="text-gray-400 hover:text-pink-400 transition-colors hover:scale-110 duration-200"
-              aria-label="Follow us on Instagram"
+              aria-label={t('footer.followInstagram')}
             >
               <InstagramIcon size={18} className="sm:w-5 sm:h-5" />
             </a>
@@ -55,7 +58,7 @@ const Footer: React.FC = () => {
               target="_blank" 
               rel="noopener noreferrer"
               className="text-gray-400 hover:text-red-500 transition-colors hover:scale-110 duration-200"
-              aria-label="Subscribe to our YouTube"
+              aria-label={t('footer.subscribeYoutube')}
             >
               <Youtube size={18} className="sm:w-5 sm:h-5" />
             </a>
@@ -64,7 +67,7 @@ const Footer: React.FC = () => {
               target="_blank" 
               rel="noopener noreferrer"
               className="text-gray-400 hover:text-purple-500 transition-colors hover:scale-110 duration-200"
-              aria-label="Follow us on Twitch"
+              aria-label={t('footer.followTwitch')}
             >
               <Twitch size={18} className="sm:w-5 sm:h-5" />
             </a>
@@ -73,7 +76,7 @@ const Footer: React.FC = () => {
               target="_blank" 
               rel="noopener noreferrer"
               className="text-gray-400 hover:text-indigo-400 transition-colors hover:scale-110 duration-200"
-              aria-label="Join our Discord"
+              aria-label={t('footer.joinDiscord')}
             >
               <DiscordIcon size={18} className="sm:w-5 sm:h-5" />
             </a>

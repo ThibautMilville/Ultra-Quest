@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from '../contexts/TranslationContext';
 
 interface SlideData {
   id: string;
@@ -13,49 +14,55 @@ interface SlideData {
   logo?: string;
 }
 
-const slides: SlideData[] = [
-  {
-    id: 'ultra',
-    title: 'Ultra',
-    subtitle: 'The Future of Gaming',
-    description: 'Experience next-generation gaming with Ultra\'s revolutionary platform. Discover exclusive games, collect unique NFTs, and join tournaments.',
-    image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=1200',
-    link: '/category/ultra',
-    color: 'from-purple-600 to-blue-600',
-    logo: '/ultra-quest/favicon.ico'
-  },
-  {
-    id: 'ashes',
-    title: 'Ashes of Mankind',
-    subtitle: 'Survive the Wasteland',
-    description: 'Enter a post-apocalyptic world where survival is everything. Build, fight, and conquer in the ultimate wasteland adventure.',
-    image: 'https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?auto=format&fit=crop&q=80&w=1200',
-    link: '/category/ashes',
-    color: 'from-orange-600 to-red-600',
-    logo: '/ultra-quest/ashesofmankind.png'
-  },
-  {
-    id: 'champion',
-    title: 'Champion Tactics',
-    subtitle: 'Master Strategic Combat',
-    description: 'Develop your tactical skills and dominate the battlefield. Plan your moves, execute perfect strategies, and become the ultimate champion.',
-    image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&q=80&w=1200',
-    link: '/category/champion',
-    color: 'from-green-600 to-emerald-600',
-    logo: '/ultra-quest/champion-tactis.png'
-  }
-];
+
 
 function CategorySlider() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [progress, setProgress] = useState(0);
+  const { t } = useTranslation();
+
+  // Get translated slide data
+  const getTranslatedSlides = (): SlideData[] => [
+    {
+      id: 'ultra',
+      title: 'Ultra',
+      subtitle: t('slider.ultra.subtitle'),
+      description: t('slider.ultra.description'),
+      image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=1200',
+      link: '/category/ultra',
+      color: 'from-purple-600 to-blue-600',
+      logo: '/favicon.ico'
+    },
+    {
+      id: 'ashes',
+      title: 'Ashes of Mankind',
+      subtitle: t('slider.ashes.subtitle'),
+      description: t('slider.ashes.description'),
+      image: 'https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?auto=format&fit=crop&q=80&w=1200',
+      link: '/category/ashes',
+      color: 'from-orange-600 to-red-600',
+      logo: '/ashesofmankind.png'
+    },
+    {
+      id: 'champion',
+      title: 'Champion Tactics',
+      subtitle: t('slider.champion.subtitle'),
+      description: t('slider.champion.description'),
+      image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&q=80&w=1200',
+      link: '/category/champion',
+      color: 'from-green-600 to-emerald-600',
+      logo: '/champion-tactis.png'
+    }
+  ];
+
+  const translatedSlides = getTranslatedSlides();
 
   // Auto-play functionality with progress tracking
   useEffect(() => {
     const progressInterval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
-          setCurrentSlide((current) => (current + 1) % slides.length);
+          setCurrentSlide((current) => (current + 1) % translatedSlides.length);
           return 0;
         }
         return prev + 2; // Increment by 2% every 100ms for 5 second duration
@@ -71,18 +78,18 @@ function CategorySlider() {
   }, [currentSlide]);
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
+    setCurrentSlide((prev) => (prev + 1) % translatedSlides.length);
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+    setCurrentSlide((prev) => (prev - 1 + translatedSlides.length) % translatedSlides.length);
   };
 
   const goToSlide = (index: number) => {
     setCurrentSlide(index);
   };
 
-  const currentSlideData = slides[currentSlide];
+  const currentSlideData = translatedSlides[currentSlide];
 
   return (
     <div className="relative group">
@@ -123,7 +130,13 @@ function CategorySlider() {
               {/* Logo */}
               {currentSlideData.logo && (
                 <div className="mb-2 sm:mb-4">
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-black/40 backdrop-blur-sm rounded-lg sm:rounded-xl flex items-center justify-center p-2">
+                  <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-lg sm:rounded-xl flex items-center justify-center p-2 ${
+                    currentSlideData.id === 'ultra' 
+                      ? 'bg-white/90 backdrop-blur-sm border border-purple-500/30' 
+                      : currentSlideData.id === 'ashes'
+                      ? 'bg-gradient-to-br from-orange-500 to-red-600'
+                      : 'bg-gradient-to-br from-green-500 to-emerald-600'
+                  }`}>
                     <img 
                       src={currentSlideData.logo} 
                       alt={currentSlideData.title}
@@ -134,7 +147,9 @@ function CategorySlider() {
                         target.nextElementSibling!.textContent = currentSlideData.title[0];
                       }}
                     />
-                    <span className="text-white font-bold text-xl hidden">{currentSlideData.title[0]}</span>
+                    <span className={`font-bold text-xl hidden ${
+                      currentSlideData.id === 'ultra' ? 'text-purple-600' : 'text-white'
+                    }`}>{currentSlideData.title[0]}</span>
                   </div>
                 </div>
               )}
@@ -159,7 +174,7 @@ function CategorySlider() {
                 to={currentSlideData.link}
                 className={`inline-block bg-gradient-to-r ${currentSlideData.color} hover:opacity-90 text-white px-4 sm:px-8 py-2 sm:py-4 rounded-full font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 text-sm sm:text-base`}
               >
-                Explore Quests
+                {t('home.exploreQuests')}
               </Link>
             </div>
           </div>
@@ -167,7 +182,7 @@ function CategorySlider() {
 
         {/* Pagination Dots - More discrete on mobile */}
         <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 sm:gap-3 z-10">
-          {slides.map((_, index) => (
+          {translatedSlides.map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
@@ -191,7 +206,7 @@ function CategorySlider() {
 
         {/* Slide indicator */}
         <div className="absolute top-2 right-2 sm:top-4 sm:right-4 bg-black/40 backdrop-blur-sm px-2 sm:px-3 py-1 rounded-full text-white text-xs sm:text-sm z-10">
-          {currentSlide + 1} / {slides.length}
+          {currentSlide + 1} / {translatedSlides.length}
         </div>
       </div>
     </div>

@@ -1,6 +1,10 @@
 import { Link } from 'react-router-dom';
 import { Wallet, Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useTranslationWithFlags } from '../../hooks/useTranslation';
+import { useLocalizedNavigation } from '../../hooks/useLocalizedNavigation';
+import LanguageSelector from './LanguageSelector';
+import { Language } from '../../types/translations.types';
 
 interface HeaderProps {
   activeSection?: string;
@@ -8,18 +12,41 @@ interface HeaderProps {
 
 function Header({ activeSection }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
+  const { t, currentLang, setCurrentLang, getCurrentFlag } = useTranslationWithFlags();
+  const { getLocalizedUrl, changeLanguage } = useLocalizedNavigation();
+  const langMenuRef = useRef<HTMLDivElement>(null);
   
   const navItems = [
-    { name: 'Home', path: '/' },
-    { name: 'Launchpad', path: 'https://launchpad-2ycml.ondigitalocean.app/en' },
-    { name: 'Ultra Times', path: 'https://ultratimes.io/', featured: true },
-    { name: 'Contact', path: '/contact' },
-    { name: 'Admin', path: '/admin/quest-manager' }
+    { name: t('nav.home'), path: getLocalizedUrl('/'), key: 'nav.home' },
+    { name: t('nav.launchpad'), path: 'https://launchpad-2ycml.ondigitalocean.app/en/', key: 'nav.launchpad' },
+    { name: t('nav.ultraTimes'), path: 'https://ultratimes.io/', featured: true, key: 'nav.ultraTimes' },
+    { name: t('nav.contact'), path: getLocalizedUrl('/contact'), key: 'nav.contact' },
+    { name: t('nav.admin'), path: getLocalizedUrl('/admin/quest-manager'), key: 'nav.admin' }
   ];
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+
+  const handleLanguageChange = (lang: Language) => {
+    changeLanguage(lang);
+    setIsLangMenuOpen(false);
+  };
+
+  // Fermer le menu langue quand on clique ailleurs
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (langMenuRef.current && !langMenuRef.current.contains(event.target as Node)) {
+        setIsLangMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <header className="bg-black/90 backdrop-blur-sm border-b border-gray-800 sticky top-0 z-50">
@@ -29,7 +56,7 @@ function Header({ activeSection }: HeaderProps) {
           <Link to="/" className="flex items-center gap-2 sm:gap-3">
             <div className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center">
               <img 
-                src="/ultra-quest/logo-ut.png" 
+                src="/logo-ut.png" 
                 alt="UT" 
                 className="w-6 h-6 sm:w-8 sm:h-8 object-contain"
                 onError={(e) => {
@@ -47,26 +74,42 @@ function Header({ activeSection }: HeaderProps) {
           <nav className="hidden md:flex items-center gap-8">
             {navItems.map((item) => {
               const isExternal = item.path.startsWith('http');
-              const Component = isExternal ? 'a' : Link;
-              const linkProps = isExternal 
-                ? { href: item.path, target: '_blank', rel: 'noopener noreferrer' }
-                : { to: item.path };
               
-              return (
-                <Component
-                  key={item.name}
-                  {...linkProps}
-                  className={`font-medium transition-all duration-200 hover:text-purple-400 hover:scale-105 ${
-                    item.featured 
-                      ? 'text-lg text-purple-400 font-bold bg-purple-400/10 px-3 py-1 rounded-lg border border-purple-400/20' 
-                      : 'text-sm'
-                  } ${
-                    activeSection === item.name ? 'text-purple-400' : item.featured ? 'text-purple-400' : 'text-gray-300'
-                  }`}
-                >
-                  {item.name}
-                </Component>
-              );
+              if (isExternal) {
+                return (
+                  <a
+                    key={item.name}
+                    href={item.path}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`font-medium transition-all duration-200 hover:text-purple-400 hover:scale-105 ${
+                      item.featured 
+                        ? 'text-lg text-purple-400 font-bold bg-purple-400/10 px-3 py-1 rounded-lg border border-purple-400/20' 
+                        : 'text-sm'
+                    } ${
+                      activeSection === item.key ? 'text-purple-400' : item.featured ? 'text-purple-400' : 'text-gray-300'
+                    }`}
+                  >
+                    {item.name}
+                  </a>
+                );
+              } else {
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.path}
+                    className={`font-medium transition-all duration-200 hover:text-purple-400 hover:scale-105 ${
+                      item.featured 
+                        ? 'text-lg text-purple-400 font-bold bg-purple-400/10 px-3 py-1 rounded-lg border border-purple-400/20' 
+                        : 'text-sm'
+                    } ${
+                      activeSection === item.key ? 'text-purple-400' : item.featured ? 'text-purple-400' : 'text-gray-300'
+                    }`}
+                  >
+                    {item.name}
+                  </Link>
+                );
+              }
             })}
           </nav>
 
@@ -81,10 +124,18 @@ function Header({ activeSection }: HeaderProps) {
 
           {/* User Actions */}
           <div className="hidden md:flex items-center gap-2 sm:gap-4">
+            <LanguageSelector
+              isOpen={isLangMenuOpen}
+              setIsOpen={setIsLangMenuOpen}
+              currentLang={currentLang}
+              handleLanguageChange={handleLanguageChange}
+              getCurrentFlag={getCurrentFlag}
+              langMenuRef={langMenuRef}
+            />
             <button className="bg-purple-600 hover:bg-purple-700 text-white px-3 sm:px-6 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-1 sm:gap-2 hover:scale-105 text-sm sm:text-base">
               <Wallet size={16} className="sm:w-[18px] sm:h-[18px]" />
-              <span className="hidden sm:inline">Connect Wallet</span>
-              <span className="sm:hidden">Connect</span>
+              <span className="hidden sm:inline">{t('wallet.connect')}</span>
+              <span className="sm:hidden">{t('wallet.connectShort')}</span>
             </button>
           </div>
         </div>
@@ -99,34 +150,61 @@ function Header({ activeSection }: HeaderProps) {
             <nav className="flex flex-col items-center gap-6">
               {navItems.map((item) => {
                 const isExternal = item.path.startsWith('http');
-                const Component = isExternal ? 'a' : Link;
-                const linkProps = isExternal 
-                  ? { href: item.path, target: '_blank', rel: 'noopener noreferrer' }
-                  : { to: item.path };
                 
-                return (
-                  <Component
-                    key={item.name}
-                    {...linkProps}
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`font-medium transition-all duration-200 hover:text-purple-400 hover:scale-105 text-center ${
-                      item.featured 
-                        ? 'text-xl text-purple-400 font-bold bg-purple-400/10 px-4 py-2 rounded-xl border border-purple-400/20 w-full max-w-xs' 
-                        : 'text-lg'
-                    } ${
-                      activeSection === item.name ? 'text-purple-400' : item.featured ? 'text-purple-400' : 'text-gray-300'
-                    }`}
-                  >
-                    {item.name}
-                  </Component>
-                );
+                if (isExternal) {
+                  return (
+                    <a
+                      key={item.name}
+                      href={item.path}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setIsMenuOpen(false)}
+                      className={`font-medium transition-all duration-200 hover:text-purple-400 hover:scale-105 text-center ${
+                        item.featured 
+                          ? 'text-xl text-purple-400 font-bold bg-purple-400/10 px-4 py-2 rounded-xl border border-purple-400/20 w-full max-w-xs' 
+                          : 'text-lg'
+                      } ${
+                        activeSection === item.key ? 'text-purple-400' : item.featured ? 'text-purple-400' : 'text-gray-300'
+                      }`}
+                    >
+                      {item.name}
+                    </a>
+                  );
+                } else {
+                  return (
+                    <Link
+                      key={item.name}
+                      to={item.path}
+                      onClick={() => setIsMenuOpen(false)}
+                      className={`font-medium transition-all duration-200 hover:text-purple-400 hover:scale-105 text-center ${
+                        item.featured 
+                          ? 'text-xl text-purple-400 font-bold bg-purple-400/10 px-4 py-2 rounded-xl border border-purple-400/20 w-full max-w-xs' 
+                          : 'text-lg'
+                      } ${
+                        activeSection === item.key ? 'text-purple-400' : item.featured ? 'text-purple-400' : 'text-gray-300'
+                      }`}
+                    >
+                      {item.name}
+                    </Link>
+                  );
+                }
               })}
               
-              {/* Mobile Connect Wallet Button */}
-              <button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 hover:scale-105 text-base w-full max-w-xs justify-center mt-4">
-                <Wallet size={18} />
-                <span>Connect Wallet</span>
-              </button>
+              {/* Mobile Actions */}
+              <div className="flex items-center justify-center gap-4 mt-4">
+                <LanguageSelector
+                  isOpen={isLangMenuOpen}
+                  setIsOpen={setIsLangMenuOpen}
+                  currentLang={currentLang}
+                  handleLanguageChange={handleLanguageChange}
+                  getCurrentFlag={getCurrentFlag}
+                  langMenuRef={langMenuRef}
+                />
+                <button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 hover:scale-105 text-base">
+                  <Wallet size={18} />
+                  <span>{t('wallet.connect')}</span>
+                </button>
+              </div>
             </nav>
           </div>
         </div>

@@ -1,11 +1,13 @@
 import React from 'react';
 import { Reward } from '../data/questsData';
+import { useTranslation } from '../contexts/TranslationContext';
 
 interface RewardCardProps {
   reward: Reward;
 }
 
 const RewardCard: React.FC<RewardCardProps> = ({ reward }) => {
+  const { t } = useTranslation();
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
       case 'common': return 'border-gray-500 bg-gray-500/10';
@@ -37,7 +39,12 @@ const RewardCard: React.FC<RewardCardProps> = ({ reward }) => {
           <h4 className="text-white font-semibold text-sm">{reward.name}</h4>
           <p className="text-gray-400 text-xs">{reward.description}</p>
           {reward.from && (
-            <p className="text-gray-500 text-xs italic">{reward.from}</p>
+            <p className="text-gray-500 text-xs italic">
+              {reward.from.startsWith('by ') 
+                ? `${t('quest.by')} ${reward.from.substring(3)}`
+                : reward.from
+              }
+            </p>
           )}
         </div>
       </div>

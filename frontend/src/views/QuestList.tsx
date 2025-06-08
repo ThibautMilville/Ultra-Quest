@@ -5,6 +5,9 @@ import { Header, Footer } from '../components/layout';
 import CategorySlider from '../components/CategorySlider';
 import { challenges, ashesQuests, ultraQuests, championQuests, featuredQuest, gameImages } from '../data/questsData';
 import { useScrollAnimation, useStaggeredScrollAnimation } from '../hooks/useScrollAnimation';
+import { useTranslation } from '../contexts/TranslationContext';
+import { useLocalizedNavigation } from '../hooks/useLocalizedNavigation';
+import { createQuestSlug } from '../utils/slugUtils';
 
 function QuestCategory({ icon, title, subtitle, active, onClick, link }: {
   icon: React.ReactNode;
@@ -41,6 +44,8 @@ function QuestRow({ title, quests, categoryLink }: {
   categoryLink: string;
 }) {
   const rowAnimation = useScrollAnimation();
+  const { t } = useTranslation();
+  const { getLocalizedUrl } = useLocalizedNavigation();
   
   const getIconColor = () => {
     if (title === 'Ashes of Mankind') return 'text-orange-400';
@@ -50,10 +55,10 @@ function QuestRow({ title, quests, categoryLink }: {
   };
 
   const getCategoryLogo = () => {
-    if (title === 'Ashes of Mankind') return '/ultra-quest/ashesofmankind.png';
-    if (title === 'Ultra') return '/ultra-quest/favicon.ico';
-    if (title === 'Champion Tactics') return '/ultra-quest/champion-tactis.png';
-    return '/ultra-quest/favicon.ico';
+    if (title === 'Ashes of Mankind') return '/ashesofmankind.png';
+    if (title === 'Ultra') return '/favicon.ico';
+    if (title === 'Champion Tactics') return '/champion-tactis.png';
+    return '/favicon.ico';
   };
 
   const getCategoryGradient = () => {
@@ -99,7 +104,13 @@ function QuestRow({ title, quests, categoryLink }: {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-4">
             {/* Category Logo */}
-            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-black/40 backdrop-blur-sm rounded-xl flex items-center justify-center p-2 border border-gray-700/50">
+            <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center p-2 ${
+              title === 'Ultra' 
+                ? 'bg-white/90 backdrop-blur-sm border border-purple-500/30' 
+                : title === 'Ashes of Mankind'
+                ? 'bg-gradient-to-br from-orange-500 to-red-600'
+                : 'bg-gradient-to-br from-green-500 to-emerald-600'
+            }`}>
               <img 
                 src={getCategoryLogo()} 
                 alt={title}
@@ -110,7 +121,9 @@ function QuestRow({ title, quests, categoryLink }: {
                   target.nextElementSibling!.textContent = title[0];
                 }}
               />
-              <span className="text-white font-bold text-xl hidden">{title[0]}</span>
+              <span className={`font-bold text-xl hidden ${
+                title === 'Ultra' ? 'text-purple-600' : 'text-white'
+              }`}>{title[0]}</span>
             </div>
             
             {/* Title */}
@@ -155,7 +168,7 @@ function QuestRow({ title, quests, categoryLink }: {
         {visibleQuests.map((quest, index) => (
           <Link 
             key={`${quest.id}-${currentIndex}`} 
-            to={`/quest/${quest.id}`}
+            to={getLocalizedUrl(`/quest/${quest.id}`)}
             className={`quest-card group relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm border border-gray-700/50 hover:border-gray-500/50 transition-all duration-500 hover:scale-105 ${isAnimating ? 'quest-card-enter' : ''}`}
           >
             <div className="relative h-40 sm:h-48 overflow-hidden">
@@ -169,7 +182,7 @@ function QuestRow({ title, quests, categoryLink }: {
               {/* Status badge */}
               <div className="absolute top-4 right-4">
                 <div className="bg-black/70 backdrop-blur-sm text-white px-3 py-1 rounded-md text-xs font-medium shadow-lg border border-gray-500/20">
-                  Ends in {quest.endsIn}
+                  {t('quest.endsIn')} {quest.endsIn}
                 </div>
               </div>
 
@@ -222,6 +235,78 @@ function QuestRow({ title, quests, categoryLink }: {
 
 function QuestList() {
   const [activeCategory, setActiveCategory] = useState('ultra');
+  const { t } = useTranslation();
+  const { getLocalizedUrl } = useLocalizedNavigation();
+  
+  // Challenges traduits
+  const translatedChallenges = [
+    {
+      id: 'daily-1',
+      title: t('challenge.daily.title'),
+      gems: 10,
+      lvlup: 1,
+      endsIn: '3H',
+      progress: 1,
+      maxProgress: 2,
+      type: 'daily' as const
+    },
+    {
+      id: 'weekly-1',
+      title: t('challenge.weekly.title'),
+      gems: 10,
+      lvlup: 1,
+      endsIn: '2D 17H',
+      progress: 6,
+      maxProgress: 10,
+      type: 'weekly' as const
+    }
+  ];
+  
+  // Quêtes Ashes traduites (les 5 premières)
+  const translatedAshesQuests = ashesQuests.map((quest, index) => {
+    if (index < 5) {
+      return {
+        ...quest,
+        title: t(`quest.ashes.${index + 1}.title` as any),
+        subtitle: t(`quest.ashes.${index + 1}.subtitle` as any),
+        description: t(`quest.ashes.${index + 1}.description` as any)
+      };
+    }
+    return quest;
+  });
+
+  // Quêtes Ultra traduites (les 6 premières)
+  const translatedUltraQuests = ultraQuests.map((quest, index) => {
+    if (index < 5) {
+      return {
+        ...quest,
+        title: t(`quest.ultra.${index + 1}.title` as any),
+        subtitle: t(`quest.ultra.${index + 1}.subtitle` as any),
+        description: t(`quest.ultra.${index + 1}.description` as any)
+      };
+    } else if (quest.id === 'ultra-6') {
+      return {
+        ...quest,
+        title: t('quest.ultra.6.title' as any),
+        subtitle: t('quest.ultra.6.subtitle' as any),
+        description: t('quest.ultra.6.description' as any)
+      };
+    }
+    return quest;
+  });
+
+  // Quêtes Champion traduites (les 3 premières)
+  const translatedChampionQuests = championQuests.map((quest, index) => {
+    if (index < 3) {
+      return {
+        ...quest,
+        title: t(`quest.champion.${index + 1}.title` as any),
+        subtitle: t(`quest.champion.${index + 1}.subtitle` as any),
+        description: t(`quest.champion.${index + 1}.description` as any)
+      };
+    }
+    return quest;
+  });
   
   // Animations au scroll
   const heroAnimation = useScrollAnimation();
@@ -234,7 +319,7 @@ function QuestList() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
       {/* Navigation */}
-      <Header activeSection="Quests" />
+      <Header activeSection="nav.home" />
 
       {/* Category Slider */}
       <section 
@@ -250,7 +335,7 @@ function QuestList() {
         className={`container mx-auto px-4 sm:px-6 py-8 sm:py-16 scroll-animate-left ${challengesAnimation.isVisible ? 'visible' : ''}`}
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
-          {challenges.map((challenge, index) => (
+          {translatedChallenges.map((challenge, index) => (
             <div key={challenge.id} className={`challenge-card rounded-2xl sm:rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl hover:scale-105 transition-all duration-300 ${
               challenge.type === 'daily' 
                 ? 'modern-daily-gradient'
@@ -268,7 +353,7 @@ function QuestList() {
                 <div className={`text-xs font-medium uppercase tracking-wider mb-4 ${
                   challenge.type === 'daily' ? 'text-purple-200' : 'text-blue-200'
                 }`}>
-                  {challenge.type === 'daily' ? 'Daily challenge' : 'Weekly challenge'}
+                  {challenge.type === 'daily' ? t('quest.type.daily') : t('quest.type.weekly')}
                 </div>
                 
                 <h3 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8 text-white leading-tight">
@@ -279,20 +364,30 @@ function QuestList() {
                   <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                     <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-2 rounded-full border border-white/30">
                       <Gift size={16} className="text-white" />
-                      <span className="text-white font-medium text-sm">{challenge.gems} Gems</span>
+                      <span className="text-white font-medium text-sm">{challenge.gems} {t('quest.gems')}</span>
                     </div>
                     <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-2 rounded-full border border-white/30">
                       <Timer size={16} className="text-white" />
-                      <span className="text-white font-medium text-sm">{challenge.lvlup} Uniq</span>
+                      <span className="text-white font-medium text-sm">{challenge.lvlup} {t('quest.uniq')}</span>
                     </div>
                     <div className="text-xs bg-white/20 backdrop-blur-sm px-3 py-2 rounded-full border border-white/30 text-white">
-                      Ends in {challenge.endsIn}
+                      {t('quest.endsIn')} {challenge.endsIn}
                     </div>
                   </div>
                   
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center shadow-lg border border-white/20 progress-circle relative">
-                                          {/* Progress ring */}
-                      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 36 36">
+                  <div className="relative">
+                    {/* Container with fixed aspect ratio */}
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/10 backdrop-blur-sm shadow-lg border border-white/20 relative">
+                      {/* Progress ring - positioned absolutely with fixed size */}
+                      <svg 
+                        className="absolute inset-0 w-16 h-16 sm:w-20 sm:h-20" 
+                        viewBox="0 0 36 36"
+                        style={{ 
+                          left: '50%',
+                          top: '50%',
+                          transform: 'translate(-50%, -50%)'
+                        }}
+                      >
                         <circle
                           cx="18"
                           cy="18"
@@ -316,7 +411,11 @@ function QuestList() {
                           }}
                         />
                       </svg>
-                    <span className="text-2xl sm:text-3xl font-bold text-white relative z-10">{challenge.progress}</span>
+                      {/* Number centered absolutely */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-xl sm:text-2xl font-bold text-white z-10">{challenge.progress}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -328,22 +427,22 @@ function QuestList() {
       {/* Ultra Quests Row - Premier */}
       <QuestRow 
         title="Ultra" 
-        quests={ultraQuests} 
-        categoryLink="/category/ultra"
+        quests={translatedUltraQuests} 
+        categoryLink={getLocalizedUrl("/category/ultra")}
       />
 
       {/* Ashes of Mankind Quests Row */}
       <QuestRow 
         title="Ashes of Mankind" 
-        quests={ashesQuests} 
-        categoryLink="/category/ashes"
+        quests={translatedAshesQuests} 
+        categoryLink={getLocalizedUrl("/category/ashes")}
       />
 
       {/* Champion Tactics Quests Row */}
       <QuestRow 
         title="Champion Tactics" 
-        quests={championQuests} 
-        categoryLink="/category/champion"
+        quests={translatedChampionQuests} 
+        categoryLink={getLocalizedUrl("/category/champion")}
       />
 
       {/* Quest Categories */}
@@ -354,7 +453,7 @@ function QuestList() {
         {/* Section Title with Centered Design Bar */}
         <div className="mb-8 sm:mb-12">
           <h2 className="text-2xl sm:text-4xl font-bold text-center bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent mb-4">
-            Quest Categories
+            {t('home.allCategories')}
           </h2>
           
           {/* Centered Design Bar */}
@@ -366,9 +465,9 @@ function QuestList() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
           <QuestCategory
             icon={
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 rounded-2xl flex items-center justify-center p-3 shadow-lg">
+              <div className="w-16 h-16 bg-white/90 backdrop-blur-sm rounded-2xl flex items-center justify-center p-3 shadow-lg border border-purple-500/30">
                 <img 
-                  src="/ultra-quest/favicon.ico" 
+                  src="/favicon.ico" 
                   alt="Ultra" 
                   className="w-full h-full object-contain"
                   onError={(e) => {
@@ -377,20 +476,20 @@ function QuestList() {
                     target.nextElementSibling!.textContent = 'U';
                   }}
                 />
-                <span className="text-white font-bold text-2xl hidden">U</span>
+                <span className="text-purple-600 font-bold text-2xl hidden">U</span>
               </div>
             }
             title="Ultra"
-            subtitle={`Browse all ${ultraQuests.length} Ultra Quests`}
+            subtitle={t('category.browse', { count: translatedUltraQuests.length, category: 'Ultra' })}
             active={activeCategory === 'ultra'}
             onClick={() => setActiveCategory('ultra')}
-            link="/category/ultra"
+            link={getLocalizedUrl("/category/ultra")}
           />
           <QuestCategory
             icon={
               <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center p-3 shadow-lg">
                 <img 
-                  src="/ultra-quest/ashesofmankind.png" 
+                  src="/ashesofmankind.png" 
                   alt="Ashes of Mankind" 
                   className="w-full h-full object-contain"
                   onError={(e) => {
@@ -403,16 +502,16 @@ function QuestList() {
               </div>
             }
             title="Ashes of Mankind"
-            subtitle={`Browse all ${ashesQuests.length} Ashes of Mankind Quests`}
+            subtitle={t('category.browse', { count: translatedAshesQuests.length, category: 'Ashes of Mankind' })}
             active={activeCategory === 'ashes'}
             onClick={() => setActiveCategory('ashes')}
-            link="/category/ashes"
+            link={getLocalizedUrl("/category/ashes")}
           />
           <QuestCategory
             icon={
               <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center p-3 shadow-lg">
                 <img 
-                  src="/ultra-quest/champion-tactis.png" 
+                  src="/champion-tactis.png" 
                   alt="Champion Tactics" 
                   className="w-full h-full object-contain"
                   onError={(e) => {
@@ -425,10 +524,10 @@ function QuestList() {
               </div>
             }
             title="Champion Tactics"
-            subtitle={`Browse all ${championQuests.length} Champion Tactics Quests`}
+            subtitle={t('category.browse', { count: translatedChampionQuests.length, category: 'Champion Tactics' })}
             active={activeCategory === 'champion'}
             onClick={() => setActiveCategory('champion')}
-            link="/category/champion"
+            link={getLocalizedUrl("/category/champion")}
           />
         </div>
       </section>

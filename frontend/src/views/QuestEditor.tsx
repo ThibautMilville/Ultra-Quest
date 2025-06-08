@@ -1,80 +1,137 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Check, X, Plus, Twitter, MessageCircle } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import { Header, Footer } from '../components/layout';
 import SocialTaskModal from './SocialTaskModal';
 import UniqRewardModal from './UniqRewardModal';
+import UltraActionModal from './UltraActionModal';
+import ImageUploadModal from '../components/ImageUploadModal';
+import { useLocalizedNavigation } from '../hooks/useLocalizedNavigation';
+import { useTranslation } from '../contexts/TranslationContext';
+import { ashesQuests, ultraQuests, championQuests } from '../data/questsData';
 
 interface QuestEditorProps {
   step?: 'information' | 'tasks' | 'rewards';
 }
 
 function QuestEditor() {
-  const { step = 'information' } = useParams();
-  const [activeStep, setActiveStep] = useState(step);
+  const { step = 'information', questId } = useParams();
+  const { getLocalizedUrl } = useLocalizedNavigation();
+  const { t } = useTranslation();
+  const [activeStep, setActiveStep] = useState(step || 'information');
   const [showSocialTaskModal, setShowSocialTaskModal] = useState(false);
   const [showUniqModal, setShowUniqModal] = useState(false);
-  const [rewards, setRewards] = useState([
-    {
-      id: 1,
-      type: 'gems',
-      name: 'Gems',
-      amount: 50,
-      description: 'Ultra Quest gems reward'
-    },
-    {
-      id: 2,
-      type: 'uniq',
-      name: 'Trailblazer Backpack Skin',
-      rarity: 'epic',
-      description: 'Exclusive backpack skin for early adopters'
-    }
-  ]);
-  const [socialTasks, setSocialTasks] = useState([
-    {
-      id: 1,
-      platform: 'twitter',
-      type: 'Follow an account',
-      title: 'Follow @ultra.io on X',
-      description: 'Discover the latest news, sneak peeks, and spicy memes from the heart of XX Gaming.'
-    },
-    {
-      id: 2,
-      platform: 'youtube',
-      type: 'Follow an account',
-      title: 'Follow @ultra.io on Youtube',
-      description: 'Discover the latest news, sneak peeks, and spicy memes from the heart of XX Gaming.'
-    },
-    {
-      id: 3,
-      platform: 'login',
-      type: '5 day login streak',
-      title: '5 day login streak',
-      description: 'Discover the latest news, sneak peeks, and spicy memes from the heart of XX Gaming.'
-    }
-  ]);
+  const [showUltraActionModal, setShowUltraActionModal] = useState(false);
+  const [showImageUpload, setShowImageUpload] = useState(false);
+  
+  // Determine if this is an edit (has questId) or create (no questId)
+  const isEditing = !!questId;
+  
+  // Find the quest data if editing
+  const findQuestById = (id: string) => {
+    const allQuests = [...ashesQuests, ...ultraQuests, ...championQuests];
+    return allQuests.find(quest => quest.id === id);
+  };
+  
+  const currentQuest = questId ? findQuestById(questId) : null;
+  
+  const [rewards, setRewards] = useState<any[]>([]);
+  const [socialTasks, setSocialTasks] = useState<any[]>([]);
+  const [ultraActions, setUltraActions] = useState<any[]>([]);
   const [questData, setQuestData] = useState({
-    name: 'Ready for battle.',
-    tagline: 'Install Ashes of Mankind',
-    description: 'Embark on an epic journey with Ashes of Mankind! Install the game now to uncover a world of mystery, challenge, and endless adventure. Don\'t miss your chance to shape the story—download and start playing today!',
-    image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&h=450&fit=crop&crop=center',
-    startDate: '2025-01-22',
+    name: '',
+    tagline: '',
+    description: '',
+    image: '',
+    startDate: '',
     endDate: '',
-    noEndDate: true,
+    noEndDate: false,
     recurrence: 'Once'
   });
 
+  // Load quest data when editing
+  useEffect(() => {
+    if (isEditing && currentQuest) {
+      setQuestData({
+        name: currentQuest.title,
+        tagline: currentQuest.subtitle,
+        description: currentQuest.description || '',
+        image: currentQuest.image,
+        startDate: '2025-01-22', // Default date since not in quest data
+        endDate: '',
+        noEndDate: true,
+        recurrence: 'Once'
+      });
+      
+      // Set default rewards based on quest data
+      setRewards([
+        {
+          id: 1,
+          type: 'gems',
+          name: 'Gems',
+          amount: currentQuest.gems,
+          description: 'Ultra Quest gems reward'
+        }
+      ]);
+      
+      // Add quest rewards if they exist
+      if (currentQuest.rewards && currentQuest.rewards.length > 0) {
+        const questRewards = currentQuest.rewards.map((reward, index) => ({
+          id: index + 2,
+          type: 'uniq',
+          name: reward.name,
+          rarity: reward.rarity,
+          description: reward.description
+        }));
+        setRewards(prev => [...prev, ...questRewards]);
+      }
+      
+      // Set default social tasks for editing
+      setSocialTasks([
+        {
+          id: 1,
+          platform: 'twitter',
+          type: 'Follow an account',
+          title: 'Follow @ultra.io on X',
+          description: 'Discover the latest news, sneak peeks, and spicy memes from the heart of XX Gaming.'
+        },
+        {
+          id: 2,
+          platform: 'youtube',
+          type: 'Follow an account',
+          title: 'Follow @ultra.io on Youtube',
+          description: 'Discover the latest news, sneak peeks, and spicy memes from the heart of XX Gaming.'
+        },
+        {
+          id: 3,
+          platform: 'login',
+          type: '5 day login streak',
+          title: '5 day login streak',
+          description: 'Discover the latest news, sneak peeks, and spicy memes from the heart of XX Gaming.'
+        }
+      ]);
+    }
+  }, [isEditing, currentQuest]);
+
+  const handleAddUltraAction = (action: any) => {
+    setUltraActions([...ultraActions, action]);
+  };
+
   const getStepStatus = (stepId: string) => {
-    if (stepId === 'information') return { completed: true };
-    if (stepId === 'tasks') return { completed: socialTasks.length > 0 };
+    if (stepId === 'information') {
+      return { 
+        completed: questData.name.trim() !== '' && questData.tagline.trim() !== '' && questData.description.trim() !== '' && questData.image.trim() !== '' && questData.startDate.trim() !== ''
+      };
+    }
+    if (stepId === 'tasks') return { completed: socialTasks.length > 0 || ultraActions.length > 0 };
     if (stepId === 'rewards') return { completed: rewards.length > 0 };
     return { completed: false };
   };
 
   const steps = [
-    { id: 'information', label: 'Quest Information', ...getStepStatus('information') },
-    { id: 'tasks', label: 'Tasks', ...getStepStatus('tasks') },
-    { id: 'rewards', label: 'Rewards', ...getStepStatus('rewards') }
+    { id: 'information', label: t('admin.questInformation'), ...getStepStatus('information') },
+    { id: 'tasks', label: t('admin.tasks'), ...getStepStatus('tasks') },
+    { id: 'rewards', label: t('admin.rewards'), ...getStepStatus('rewards') }
   ];
 
   const getStepIcon = (step: any) => {
@@ -93,27 +150,27 @@ function QuestEditor() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col">
-      <Header activeSection="Admin" />
+      <Header activeSection="nav.admin" />
       
       <div className="flex flex-col lg:flex-row">
         {/* Sidebar */}
-        <div className="w-full lg:w-64 bg-gray-800 min-h-auto lg:min-h-screen p-4 lg:p-6">
-                      <div className="flex lg:flex-col lg:space-y-4 space-x-4 lg:space-x-0 overflow-x-auto lg:overflow-x-visible">
-              {steps.map((step) => (
-                <div
-                  key={step.id}
-                  onClick={() => setActiveStep(step.id)}
-                  className={`flex items-center gap-2 lg:gap-3 p-2 lg:p-3 rounded-lg cursor-pointer transition-colors whitespace-nowrap ${
-                    step.id === activeStep ? 'bg-gray-700' : 'hover:bg-gray-700/50'
-                  }`}
-                >
-                  <div className={`w-5 h-5 lg:w-6 lg:h-6 rounded-full flex items-center justify-center text-xs lg:text-sm font-medium ${getStepBg(step.id)}`}>
-                    {getStepIcon(step) || (step.id === activeStep ? '●' : '○')}
-                  </div>
-                  <span className="font-medium text-sm lg:text-base">{step.label}</span>
+        <div className="w-full lg:w-80 bg-gray-800 min-h-auto lg:min-h-screen p-4 lg:p-6">
+          <div className="flex lg:flex-col lg:space-y-4 space-x-4 lg:space-x-0 overflow-x-auto lg:overflow-x-visible">
+            {steps.map((step) => (
+              <div
+                key={step.id}
+                onClick={() => setActiveStep(step.id)}
+                className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors whitespace-nowrap min-w-fit ${
+                  step.id === activeStep ? 'bg-gray-700' : 'hover:bg-gray-700/50'
+                }`}
+              >
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0 ${getStepBg(step.id)}`}>
+                  {getStepIcon(step) || (step.id === activeStep ? '●' : '○')}
                 </div>
-              ))}
-            </div>
+                <span className="font-medium text-base flex-shrink-0">{step.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Main Content */}
@@ -131,11 +188,11 @@ function QuestEditor() {
             <div className="absolute inset-0 flex flex-col sm:flex-row items-center justify-between px-4 sm:px-8 py-4">
               <div className="flex items-center gap-2 sm:gap-4 mb-2 sm:mb-0">
                 <Link 
-                  to="/admin/quest-manager"
+                  to={getLocalizedUrl("/admin/quest-manager")}
                   className="flex items-center gap-1 sm:gap-2 text-white hover:text-gray-300 transition-colors"
                 >
                   <ArrowLeft size={16} className="sm:w-5 sm:h-5" />
-                  <span className="font-medium text-sm sm:text-base">Leave Quest Editor</span>
+                  <span className="font-medium text-sm sm:text-base">{t('admin.leaveQuestEditor')}</span>
                 </Link>
               </div>
               
@@ -145,7 +202,9 @@ function QuestEditor() {
                   {activeStep === 'tasks' && 'Tasks'}
                   {activeStep === 'rewards' && 'Rewards'}
                 </h1>
-                <p className="text-white/80 text-xs sm:text-base">Overall information about your Quest</p>
+                <p className="text-white/80 text-xs sm:text-base">
+                  {isEditing ? 'Edit your existing quest' : 'Create a new quest'}
+                </p>
               </div>
             </div>
           </div>
@@ -233,18 +292,30 @@ function QuestEditor() {
                         alt="Quest preview"
                         className="w-full h-48 object-cover"
                       />
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer">
+                      <div 
+                        onClick={() => setShowImageUpload(true)}
+                        className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
+                      >
                         <div className="text-white text-center">
                           <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mx-auto mb-3">
                             📁
                           </div>
-                          <p className="font-medium">Upload an image</p>
+                          <p className="font-medium">Change image</p>
                           <p className="text-sm">Recommended size: 1792x1024px</p>
                         </div>
                       </div>
+                      <button
+                        onClick={() => setQuestData({...questData, image: ''})}
+                        className="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-colors"
+                      >
+                        <X size={16} className="text-white" />
+                      </button>
                     </div>
                   ) : (
-                    <div className="border-2 border-dashed border-gray-600 rounded-lg p-12 text-center hover:border-gray-500 transition-colors cursor-pointer">
+                    <div 
+                      onClick={() => setShowImageUpload(true)}
+                      className="border-2 border-dashed border-gray-600 rounded-lg p-12 text-center hover:border-gray-500 transition-colors cursor-pointer"
+                    >
                       <div className="text-gray-400 mb-4">
                         <div className="w-12 h-12 bg-gray-700 rounded-lg flex items-center justify-center mx-auto mb-3">
                           📁
@@ -354,6 +425,41 @@ function QuestEditor() {
             <div className="max-w-4xl">
 
               <div className="space-y-8">
+                {/* Existing Ultra Actions */}
+                {ultraActions.length > 0 && (
+                  <div>
+                    <label className="flex items-center gap-2 text-white font-medium mb-3">
+                      Ultra Actions ({ultraActions.length})
+                    </label>
+                    <div className="space-y-3 mb-6">
+                      {ultraActions.map((action) => (
+                        <div key={action.id} className="bg-gray-800 border border-gray-700 rounded-lg p-4 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
+                              {action.icon}
+                            </div>
+                            <div>
+                              <h4 className="text-white font-medium">{action.title}</h4>
+                              <p className="text-gray-400 text-sm">{action.type}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button className="text-gray-400 hover:text-white transition-colors">
+                              ✏️
+                            </button>
+                            <button 
+                              onClick={() => setUltraActions(ultraActions.filter(a => a.id !== action.id))}
+                              className="text-gray-400 hover:text-red-400 transition-colors"
+                            >
+                              <X size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Existing Tasks */}
                 {socialTasks.length > 0 && (
                   <div>
@@ -398,7 +504,10 @@ function QuestEditor() {
                     <span className="text-red-500">*</span>
                   </label>
                   <div className="grid grid-cols-2 gap-4 mb-6">
-                    <button className="bg-gray-800 border border-gray-700 rounded-lg p-6 text-center hover:border-gray-600 transition-colors">
+                    <button 
+                      onClick={() => setShowUltraActionModal(true)}
+                      className="bg-gray-800 border border-gray-700 rounded-lg p-6 text-center hover:border-gray-600 transition-colors"
+                    >
                       <div className="text-2xl mb-2">🎮</div>
                       <p className="text-white font-medium">Ultra Activity task</p>
                     </button>
@@ -576,6 +685,20 @@ function QuestEditor() {
         isOpen={showUniqModal}
         onClose={() => setShowUniqModal(false)}
         onAdd={(reward) => setRewards([...rewards, reward])}
+      />
+
+      <UltraActionModal 
+        isOpen={showUltraActionModal} 
+        onClose={() => setShowUltraActionModal(false)} 
+        onAddAction={handleAddUltraAction}
+      />
+
+      <ImageUploadModal
+        isOpen={showImageUpload}
+        onClose={() => setShowImageUpload(false)}
+        onImageSelect={(imageUrl) => setQuestData({...questData, image: imageUrl})}
+        title="Quest Image"
+        recommendedSize="1792x1024px"
       />
     </div>
   );

@@ -4,8 +4,14 @@ import { Link } from 'react-router-dom';
 import { Header, Footer } from '../components/layout';
 import { ultraQuests } from '../data/questsData';
 import { useStaggeredScrollAnimation } from '../hooks/useScrollAnimation';
+import { useLocalizedNavigation } from '../hooks/useLocalizedNavigation';
+import { createQuestSlug } from '../utils/slugUtils';
+import { useTranslation } from '../contexts/TranslationContext';
 
 function UltraQuestCategory() {
+  const { getLocalizedUrl } = useLocalizedNavigation();
+  const { t } = useTranslation();
+  
   // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -42,7 +48,7 @@ function UltraQuestCategory() {
             className="flex items-center gap-2 sm:gap-3 bg-black/40 backdrop-blur-sm px-3 sm:px-4 py-2 sm:py-3 rounded-full hover:bg-black/60 transition-all duration-200 shadow-lg hover-lift-sm"
           >
             <ArrowLeft size={16} className="text-white sm:w-5 sm:h-5" />
-            <span className="text-white font-medium text-sm sm:text-base">Back</span>
+            <span className="text-white font-medium text-sm sm:text-base">{t('button.back')}</span>
           </Link>
         </div>
 
@@ -50,9 +56,9 @@ function UltraQuestCategory() {
         <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8">
           <div className="container mx-auto">
             <div className="flex items-center gap-3 sm:gap-6 mb-4 sm:mb-6">
-              <div className="w-12 h-12 sm:w-20 sm:h-20 bg-gradient-to-br from-purple-600 to-blue-600 rounded-xl sm:rounded-2xl flex items-center justify-center p-2 sm:p-4 shadow-lg">
+              <div className="w-12 h-12 sm:w-20 sm:h-20 bg-white/90 backdrop-blur-sm border border-purple-500/30 rounded-xl sm:rounded-2xl flex items-center justify-center p-2 sm:p-4 shadow-lg">
                 <img 
-                  src="/ultra-quest/favicon.ico" 
+                  src="/favicon.ico" 
                   alt="Ultra" 
                   className="w-full h-full object-contain"
                   onError={(e) => {
@@ -61,13 +67,13 @@ function UltraQuestCategory() {
                     target.nextElementSibling!.textContent = 'U';
                   }}
                 />
-                <span className="text-white font-bold text-3xl hidden">U</span>
+                <span className="text-purple-600 font-bold text-3xl hidden">U</span>
               </div>
               <div>
                 <h1 className="text-2xl sm:text-5xl font-bold mb-1 sm:mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                   Ultra
                 </h1>
-                <p className="text-sm sm:text-xl text-gray-300">The future of gaming - {ultraQuests.length} innovative quests</p>
+                <p className="text-sm sm:text-xl text-gray-300">{t('categoryPage.ultra.subtitle', { count: ultraQuests.length })}</p>
               </div>
             </div>
           </div>
@@ -98,7 +104,7 @@ function UltraQuestCategory() {
                 {/* Status badge */}
                 <div className="absolute top-4 right-4">
                   <div className="bg-black/70 backdrop-blur-sm text-white px-3 py-1 rounded-md text-xs font-medium shadow-lg border border-gray-500/20">
-                    Ends in {quest.endsIn}
+                    {t('quest.endsIn')} {quest.endsIn}
                   </div>
                 </div>
 
@@ -132,15 +138,15 @@ function UltraQuestCategory() {
                 {quest.completed ? (
                   <button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-purple-500/25 hover-lift-sm">
                     <Gift size={18} />
-                    Claim rewards
+                    {t('button.claimRewards')}
                   </button>
                 ) : (
                   <Link 
-                    to={`/quest/${quest.id}`}
+                    to={getLocalizedUrl(`/quest/${quest.id}`)}
                     className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-purple-500/25 hover-lift-sm"
                   >
                     <Play size={18} />
-                    Start Quest
+                    {t('button.startQuest')}
                   </Link>
                 )}
               </div>
