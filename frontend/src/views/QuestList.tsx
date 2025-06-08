@@ -49,6 +49,20 @@ function QuestRow({ title, quests, categoryLink }: {
     return 'text-blue-400';
   };
 
+  const getCategoryLogo = () => {
+    if (title === 'Ashes of Mankind') return '/ultra-quest/ashesofmankind.png';
+    if (title === 'Ultra') return '/ultra-quest/favicon.ico';
+    if (title === 'Champion Tactics') return '/ultra-quest/champion-tactis.png';
+    return '/ultra-quest/favicon.ico';
+  };
+
+  const getCategoryGradient = () => {
+    if (title === 'Ashes of Mankind') return 'from-orange-600 to-red-600';
+    if (title === 'Ultra') return 'from-purple-600 to-blue-600';
+    if (title === 'Champion Tactics') return 'from-green-600 to-emerald-600';
+    return 'from-blue-600 to-cyan-600';
+  };
+
   // Sort quests to show completed ones first
   const sortedQuests = [...quests].sort((a, b) => {
     if (a.completed && !b.completed) return -1;
@@ -57,15 +71,20 @@ function QuestRow({ title, quests, categoryLink }: {
   });
 
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
   const questsToShow = 3;
   const maxIndex = Math.max(0, sortedQuests.length - questsToShow);
 
   const nextQuests = () => {
+    setIsAnimating(true);
     setCurrentIndex(prev => Math.min(prev + 1, maxIndex));
+    setTimeout(() => setIsAnimating(false), 300);
   };
 
   const prevQuests = () => {
+    setIsAnimating(true);
     setCurrentIndex(prev => Math.max(prev - 1, 0));
+    setTimeout(() => setIsAnimating(false), 300);
   };
 
   const visibleQuests = sortedQuests.slice(currentIndex, currentIndex + questsToShow);
@@ -75,40 +94,69 @@ function QuestRow({ title, quests, categoryLink }: {
       ref={rowAnimation.elementRef as React.RefObject<HTMLElement>}
       className={`container mx-auto px-4 sm:px-6 py-8 sm:py-12 scroll-animate-right ${rowAnimation.isVisible ? 'visible' : ''}`}
     >
-      <div className="flex items-center justify-between mb-6 sm:mb-8">
-        <h2 className="text-2xl sm:text-3xl font-bold text-white">{title}</h2>
-        <div className="flex items-center gap-2 sm:gap-4">
-          <button 
-            onClick={prevQuests}
-            disabled={currentIndex === 0}
-            className={`slider-nav p-2 sm:p-3 rounded-full transition-all duration-300 border ${
-              currentIndex === 0 
-                ? 'bg-gray-800/30 border-gray-700/30 text-gray-600 cursor-not-allowed' 
-                : 'bg-gray-800/50 hover:bg-gray-700/50 border-gray-700/50 text-white hover:scale-110'
-            }`}
-          >
-            <ChevronLeft size={16} className="sm:w-5 sm:h-5" />
-          </button>
-          <button 
-            onClick={nextQuests}
-            disabled={currentIndex >= maxIndex}
-            className={`slider-nav p-2 sm:p-3 rounded-full transition-all duration-300 border ${
-              currentIndex >= maxIndex 
-                ? 'bg-gray-800/30 border-gray-700/30 text-gray-600 cursor-not-allowed' 
-                : 'bg-gray-800/50 hover:bg-gray-700/50 border-gray-700/50 text-white hover:scale-110'
-            }`}
-          >
-            <ChevronRight size={16} className="sm:w-5 sm:h-5" />
-          </button>
+      {/* Section Header with Logo and Design Bar */}
+      <div className="mb-4 sm:mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-4">
+            {/* Category Logo */}
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-black/40 backdrop-blur-sm rounded-xl flex items-center justify-center p-2 border border-gray-700/50">
+              <img 
+                src={getCategoryLogo()} 
+                alt={title}
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  target.nextElementSibling!.textContent = title[0];
+                }}
+              />
+              <span className="text-white font-bold text-xl hidden">{title[0]}</span>
+            </div>
+            
+            {/* Title */}
+            <h2 className="text-2xl sm:text-4xl font-bold text-white">{title}</h2>
+          </div>
+
+          {/* Navigation Arrows */}
+          <div className="flex items-center gap-2 sm:gap-4">
+            <button 
+              onClick={prevQuests}
+              disabled={currentIndex === 0}
+              className={`slider-nav p-2 sm:p-3 rounded-full transition-all duration-300 border ${
+                currentIndex === 0 
+                  ? 'bg-gray-800/30 border-gray-700/30 text-gray-600 cursor-not-allowed' 
+                  : 'bg-gray-800/50 hover:bg-gray-700/50 border-gray-700/50 text-white hover:scale-110'
+              }`}
+            >
+              <ChevronLeft size={16} className="sm:w-5 sm:h-5" />
+            </button>
+            <button 
+              onClick={nextQuests}
+              disabled={currentIndex >= maxIndex}
+              className={`slider-nav p-2 sm:p-3 rounded-full transition-all duration-300 border ${
+                currentIndex >= maxIndex 
+                  ? 'bg-gray-800/30 border-gray-700/30 text-gray-600 cursor-not-allowed' 
+                  : 'bg-gray-800/50 hover:bg-gray-700/50 border-gray-700/50 text-white hover:scale-110'
+              }`}
+            >
+              <ChevronRight size={16} className="sm:w-5 sm:h-5" />
+            </button>
+          </div>
+        </div>
+        
+        {/* Modern Design Bar */}
+        <div className="relative h-1 bg-gray-800/30 rounded-full overflow-hidden">
+          <div className={`absolute inset-0 bg-gradient-to-r ${getCategoryGradient()} modern-bar-fade`}></div>
+          <div className={`absolute top-0 left-0 w-full h-full bg-gradient-to-r ${getCategoryGradient()} animate-pulse opacity-20`}></div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {visibleQuests.map((quest, index) => (
           <Link 
-            key={quest.id} 
+            key={`${quest.id}-${currentIndex}`} 
             to={`/quest/${quest.id}`}
-            className="quest-card group relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm border border-gray-700/50 hover:border-gray-500/50 transition-all duration-500 hover:scale-105"
+            className={`quest-card group relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm border border-gray-700/50 hover:border-gray-500/50 transition-all duration-500 hover:scale-105 ${isAnimating ? 'quest-card-enter' : ''}`}
           >
             <div className="relative h-40 sm:h-48 overflow-hidden">
               <img 
@@ -203,35 +251,73 @@ function QuestList() {
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
           {challenges.map((challenge, index) => (
-            <div key={challenge.id} className={`challenge-card rounded-xl sm:rounded-2xl p-4 sm:p-8 relative overflow-hidden shadow-2xl hover:scale-105 transition-all duration-300 ${
+            <div key={challenge.id} className={`challenge-card rounded-2xl sm:rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl hover:scale-105 transition-all duration-300 ${
               challenge.type === 'daily' 
-                ? 'bg-gradient-to-br from-purple-600 via-purple-700 to-pink-600'
-                : 'bg-gradient-to-br from-blue-600 via-blue-700 to-cyan-600'
+                ? 'modern-daily-gradient'
+                : 'modern-weekly-gradient'
             }`}>
-              <div className={`absolute top-4 left-6 text-xs font-medium uppercase tracking-wider ${
-                challenge.type === 'daily' ? 'text-purple-200' : 'text-blue-200'
-              }`}>
-                {challenge.type === 'daily' ? 'Daily challenge' : 'Weekly challenge'}
-              </div>
-              <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 mt-4 sm:mt-8">{challenge.title}</h3>
-              <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-4 sm:gap-8">
-                    <div className="flex items-center gap-2 sm:gap-3 bg-white/20 backdrop-blur-sm px-3 sm:px-4 py-2 rounded-full">
-                    <Gift size={18} className="text-white" />
-                    <span className="text-white font-medium">{challenge.gems} Gems</span>
-                  </div>
-                  <div className="flex items-center gap-2 sm:gap-3 bg-white/20 backdrop-blur-sm px-3 sm:px-4 py-2 rounded-full">
-                    <Timer size={18} className="text-white" />
-                    <span className="text-white font-medium text-sm sm:text-base">{challenge.lvlup} LvlUp</span>
-                  </div>
-                  <div className={`text-xs sm:text-sm bg-white/20 backdrop-blur-sm px-3 sm:px-4 py-2 rounded-full ${
-                    challenge.type === 'daily' ? 'text-purple-100' : 'text-blue-100'
-                  }`}>
-                    Ends in {challenge.endsIn}
-                  </div>
+              {/* Animated gradient overlay */}
+              <div className={`absolute inset-0 opacity-30 ${
+                challenge.type === 'daily' 
+                  ? 'animated-daily-overlay'
+                  : 'animated-weekly-overlay'
+              }`}></div>
+              
+              {/* Content */}
+              <div className="relative z-10">
+                <div className={`text-xs font-medium uppercase tracking-wider mb-4 ${
+                  challenge.type === 'daily' ? 'text-purple-200' : 'text-blue-200'
+                }`}>
+                  {challenge.type === 'daily' ? 'Daily challenge' : 'Weekly challenge'}
                 </div>
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg progress-circle">
-                  <span className="text-2xl sm:text-4xl font-bold text-white">{challenge.progress}</span>
+                
+                <h3 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8 text-white leading-tight">
+                  {challenge.title}
+                </h3>
+                
+                <div className="flex items-end justify-between">
+                  <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                    <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-2 rounded-full border border-white/30">
+                      <Gift size={16} className="text-white" />
+                      <span className="text-white font-medium text-sm">{challenge.gems} Gems</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-2 rounded-full border border-white/30">
+                      <Timer size={16} className="text-white" />
+                      <span className="text-white font-medium text-sm">{challenge.lvlup} Uniq</span>
+                    </div>
+                    <div className="text-xs bg-white/20 backdrop-blur-sm px-3 py-2 rounded-full border border-white/30 text-white">
+                      Ends in {challenge.endsIn}
+                    </div>
+                  </div>
+                  
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center shadow-lg border border-white/20 progress-circle relative">
+                                          {/* Progress ring */}
+                      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 36 36">
+                        <circle
+                          cx="18"
+                          cy="18"
+                          r="15.9155"
+                          fill="none"
+                          stroke="rgba(255, 255, 255, 0.2)"
+                          strokeWidth="2"
+                        />
+                        <circle
+                          cx="18"
+                          cy="18"
+                          r="15.9155"
+                          fill="none"
+                          stroke="white"
+                          strokeWidth="2"
+                          strokeDasharray={`${(challenge.progress / challenge.maxProgress) * 100}, 100`}
+                          strokeLinecap="round"
+                          style={{ 
+                            transform: 'rotate(-90deg)', 
+                            transformOrigin: '18px 18px'
+                          }}
+                        />
+                      </svg>
+                    <span className="text-2xl sm:text-3xl font-bold text-white relative z-10">{challenge.progress}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -265,7 +351,18 @@ function QuestList() {
         ref={categoriesAnimation.elementRef as React.RefObject<HTMLElement>}
         className={`container mx-auto px-4 sm:px-6 py-8 sm:py-16 scroll-animate ${categoriesAnimation.isVisible ? 'visible' : ''}`}
       >
-        <h2 className="text-2xl sm:text-3xl font-bold mb-8 sm:mb-12 text-center bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Quest category</h2>
+        {/* Section Title with Centered Design Bar */}
+        <div className="mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-4xl font-bold text-center bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent mb-4">
+            Quest Categories
+          </h2>
+          
+          {/* Centered Design Bar */}
+          <div className="relative h-1 bg-gray-800/30 rounded-full overflow-hidden max-w-4xl mx-auto">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 centered-bar-fade"></div>
+            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-purple-600 to-blue-600 animate-pulse opacity-20"></div>
+          </div>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
           <QuestCategory
             icon={

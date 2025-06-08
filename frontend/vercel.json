@@ -14,11 +14,11 @@
   "rewrites": [
     {
       "source": "/ultra-quest/(.*)",
-      "destination": "/$1"
+      "destination": "/ultra-quest/index.html"
     },
     {
       "source": "/ultra-quest",
-      "destination": "/index.html"
+      "destination": "/ultra-quest/index.html"
     }
   ],
   "headers": [
