@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const apiUrl: string = import.meta.env.VITE_APP_API_URL || ''
+const apiUrl: string = import.meta.env.VITE_APP_API_URL || '/api'
 
 export const apiRequestor = axios.create({
   baseURL: apiUrl,
@@ -8,3 +8,8 @@ export const apiRequestor = axios.create({
     'Content-Type': 'application/json',
   },
 })
+
+// Log pour debug en développement
+if (import.meta.env.DEV) {
+  console.log('API URL:', apiUrl);
+}

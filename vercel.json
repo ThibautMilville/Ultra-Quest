@@ -31,12 +31,12 @@
     {
       "source": "/ultra-quest",
       "destination": "/fr",
-      "permanent": true
+      "permanent": false
     },
     {
       "source": "/ultra-quest/(.*)",
       "destination": "/fr/$1",
-      "permanent": true
+      "permanent": false
     }
   ]
 } 
