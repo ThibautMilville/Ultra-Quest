@@ -3,40 +3,8 @@
   "outputDirectory": "frontend/dist",
   "rewrites": [
     {
-      "source": "/fr/(jeu|quete|social|categorie|admin|contact)/(.*)",
+      "source": "/(.*)",
       "destination": "/index.html"
-    },
-    {
-      "source": "/en/(game|quest|social|category|admin|contact)/(.*)",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/de/(spiel|quest|sozial|kategorie|admin|kontakt)/(.*)",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/(fr|en|de)/(.*)",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/(fr|en|de)",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/",
-      "destination": "/index.html"
-    }
-  ],
-  "redirects": [
-    {
-      "source": "/ultra-quest",
-      "destination": "/fr",
-      "permanent": false
-    },
-    {
-      "source": "/ultra-quest/(.*)",
-      "destination": "/fr/$1",
-      "permanent": false
     }
   ]
 } 
